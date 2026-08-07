@@ -194,16 +194,24 @@ def save_settings(settings: dict[str, Any]) -> None:
 
 # ── Git / GitHub ────────────────────────────────────────────────────────────
 
-def _git_env() -> dict[str, str]:
+def _git_env(interactive: bool = False) -> dict[str, str]:
     env = os.environ.copy()
-    # eșuează rapid dacă nu există credentiale (fără prompt interactiv blocat)
-    env["GIT_TERMINAL_PROMPT"] = "0"
-    env.setdefault("GCM_INTERACTIVE", "Never")
+    if interactive:
+        # permite fereastra Git Credential Manager (login GitHub)
+        env["GIT_TERMINAL_PROMPT"] = "1"
+        env["GCM_INTERACTIVE"] = "Always"
+    else:
+        env["GIT_TERMINAL_PROMPT"] = "0"
+        env["GCM_INTERACTIVE"] = "Never"
     return env
 
 
-def git_run(*args: str, timeout: int = 120) -> tuple[int, str, str]:
+def git_run(*args: str, timeout: int = 120, interactive: bool = False) -> tuple[int, str, str]:
     try:
+        # pe Windows, login GCM are nevoie de fereastră (nu CREATE_NO_WINDOW)
+        flags = 0
+        if sys.platform == "win32" and not interactive:
+            flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
         r = subprocess.run(
             ["git", *args],
             cwd=str(ROOT),
@@ -212,8 +220,8 @@ def git_run(*args: str, timeout: int = 120) -> tuple[int, str, str]:
             encoding="utf-8",
             errors="replace",
             timeout=timeout,
-            env=_git_env(),
-            creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0,
+            env=_git_env(interactive=interactive),
+            creationflags=flags,
         )
         return r.returncode, (r.stdout or "").strip(), (r.stderr or "").strip()
     except FileNotFoundError:
@@ -289,16 +297,42 @@ def push_to_github(commit_message: str) -> tuple[bool, str]:
             return False, f"git commit a eșuat:\n{err or out}"
 
     code, out, err = git_run("push", "-u", REMOTE_NAME, BRANCH, timeout=120)
+    if code != 0 and _is_auth_error(err or out):
+        # a doua încercare: deschide login Git Credential Manager (browser)
+        code, out, err = git_run(
+            "push", "-u", REMOTE_NAME, BRANCH, timeout=300, interactive=True
+        )
+
     if code != 0:
         hint = (
-            "\n\nVerifică autentificarea GitHub:\n"
-            "• Windows Credential Manager (parolă = Personal Access Token)\n"
-            "• sau: gh auth login / git credential\n"
-            "• Repo: https://github.com/Mihaifl1/iot-proiecte"
+            "\n\nAutentificare GitHub necesară (o singură dată pe acest PC):\n"
+            "1. Creează un token: https://github.com/settings/tokens\n"
+            "   (classic → scope: repo)\n"
+            "2. În PowerShell, în folderul proiectului:\n"
+            "   git push -u origin main\n"
+            "3. Username = contul GitHub, Password = tokenul (nu parola contului)\n"
+            "   Sau: winget install GitHub.cli  →  gh auth login\n"
+            "\nRepo: https://github.com/Mihaifl1/iot-proiecte"
         )
         return False, f"git push a eșuat:\n{err or out}{hint}"
 
     return True, f"GitHub actualizat: {commit_message}"
+
+
+def _is_auth_error(text: str) -> bool:
+    t = (text or "").lower()
+    keys = (
+        "authentication",
+        "auth",
+        "could not read username",
+        "permission denied",
+        "403",
+        "401",
+        "login",
+        "credential",
+        "terminal prompts disabled",
+    )
+    return any(k in t for k in keys)
 
 
 # ── Scrollable form helpers ─────────────────────────────────────────────────
