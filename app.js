@@ -45,45 +45,6 @@ function renderHeader(showBack) {
     </div>`;
 }
 
-/** Mini-icon SVG pe card, după tag-uri (calm, discret) */
-function cardIconSvg(p) {
-  const tags = (p.tags || []).map((t) => String(t).toLowerCase()).join(" ");
-  const title = String(p.title || "").toLowerCase();
-  const blob = tags + " " + title;
-
-  // releu
-  if (/releu|relay/.test(blob)) {
-    return `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <rect x="3" y="7" width="18" height="11" rx="2" stroke="#d4a574" stroke-width="1.3"/>
-      <rect x="5" y="9" width="6" height="7" rx="1" stroke="#5b9fd4" stroke-width="1"/>
-      <circle cx="16" cy="12.5" r="2.5" stroke="#5eb8a8" stroke-width="1.1"/>
-    </svg>`;
-  }
-  // motor
-  if (/motor|bts|pwm/.test(blob)) {
-    return `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <circle cx="12" cy="12" r="7" stroke="#5b9fd4" stroke-width="1.3"/>
-      <circle cx="12" cy="12" r="2.5" fill="#5eb8a8" opacity="0.7"/>
-      <path d="M12 5v2M12 17v2M5 12h2M17 12h2" stroke="#8b9aab" stroke-width="1.2" stroke-linecap="round"/>
-    </svg>`;
-  }
-  // temp / senzor
-  if (/temp|ds18|senzor|sensor|irig/.test(blob)) {
-    return `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M10 14.5V6a2 2 0 114 0v8.5a3.5 3.5 0 11-4 0z" stroke="#8fbc8f" stroke-width="1.3"/>
-      <circle cx="12" cy="16" r="1.5" fill="#5eb8a8"/>
-    </svg>`;
-  }
-  // default ESP board
-  return `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <rect x="5" y="3" width="14" height="18" rx="2" stroke="#5b9fd4" stroke-width="1.3"/>
-    <rect x="7" y="6" width="10" height="6" rx="1" stroke="#5eb8a8" stroke-width="1"/>
-    <circle cx="9" cy="16" r="1" fill="#5b9fd4"/>
-    <circle cx="12" cy="16" r="1" fill="#5eb8a8"/>
-    <circle cx="15" cy="16" r="1" fill="#8fbc8f"/>
-  </svg>`;
-}
-
 function renderHub() {
   renderHeader(false);
   $("#view-hub").classList.add("active");
@@ -105,7 +66,6 @@ function renderHub() {
           ${tags}
         </div>
       </div>
-      <div class="card-icon">${cardIconSvg(p)}</div>
     </a>`;
   }).join("");
 }
