@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Proiecte IoT – introdu numărul din video</title>
+  <meta name="description" content="Site proiecte IoT pentru TikTok: introduci numărul din video, primești schema de cablare și sketch-ul Arduino gata de upload pe ESP." />
+  <meta property="og:title" content="Proiecte IoT – #001 #002 #003…" />
+  <meta property="og:description" content="Din video TikTok → număr proiect → schemă + sketch ESP" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header id="site-header"></header>
+
+    <!-- HUB -->
+    <div id="view-hub" class="view active">
+      <section class="hero">
+        <h1>Proiecte IoT</h1>
+        <p>Ai văzut un număr în video? Introdu-l aici.</p>
+      </section>
+
+      <div class="num-box">
+        <label for="project-number">Număr proiect din TikTok</label>
+        <div class="num-row">
+          <input
+            id="project-number"
+            type="text"
+            inputmode="numeric"
+            autocomplete="off"
+            placeholder="001"
+            maxlength="6"
+            aria-label="Număr proiect"
+          />
+          <button type="button" id="btn-go">Deschide</button>
+        </div>
+        <p class="num-hint">Exemple: 001 · 1 · 002 · 003</p>
+        <p class="num-error" id="num-error"></p>
+      </div>
+
+      <div class="section-title">Toate proiectele</div>
+      <div class="list" id="project-list"></div>
+
+      <p class="foot">TikTok @mihaifl5 · schemă + sketch public · ESP8266 / ESP32</p>
+    </div>
+
+    <!-- PROJECT (filled by JS) -->
+    <div id="view-project" class="view"></div>
+  </div>
+
+  <script src="projects-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
