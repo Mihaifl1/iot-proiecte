@@ -41,7 +41,7 @@ function renderHeader(showBack) {
         <span class="logo">IoT</span>
         <span>Proiecte IoT</span>
       </a>
-      ${showBack ? `<a class="back-link" href="#/">← Toate proiectele</a>` : `<span class="back-link">@mihaifl5</span>`}
+      ${showBack ? `<a class="back-link" href="#/">← Toate proiectele</a>` : `<span class="back-link">schemă + sketch</span>`}
     </div>`;
 }
 
@@ -90,11 +90,6 @@ function renderProject(p) {
       <div class="proj-num">PROIECT #${p.id}</div>
       <h1>${escapeHtml(p.title)}</h1>
       <p class="sub">${escapeHtml(p.short)} · ${escapeHtml(p.board)}</p>
-    </div>
-
-    <div class="tiktok-tip">
-      <strong>TikTok:</strong> ${escapeHtml(p.tiktok)}<br>
-      Text pe ecran: <strong>Proiect #${p.id}</strong> → link în bio → introduci <strong>${p.id}</strong>
     </div>
 
     <section class="panel" id="schema">

@@ -181,17 +181,6 @@ a:hover { text-decoration: underline; }
 .proj-head h1 { margin: 0 0 6px; font-size: 1.45rem; }
 .proj-head .sub { margin: 0; color: var(--muted); }
 
-.tiktok-tip {
-  background: linear-gradient(135deg, #1a1025, #141416);
-  border: 1px solid #3b2a4a;
-  border-radius: var(--radius);
-  padding: 12px 14px;
-  margin-bottom: 14px;
-  font-size: 0.9rem;
-  color: var(--muted);
-}
-.tiktok-tip strong { color: #e9d5ff; }
-
 .panel {
   background: var(--card);
   border: 1px solid var(--border);
