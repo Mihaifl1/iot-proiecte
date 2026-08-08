@@ -96,5 +96,34 @@
     ],
     "sketch": "#include <WiFi.h>\n#include <WebServer.h>\n#include <OneWire.h>\n#include <DallasTemperature.h>\n\nconst char* ap_ssid = \"ESP32-Temp\";\nconst char* ap_pass = \"12345678\";\n#define ONE_WIRE_BUS 4\n#define RELAY1 5\n#define RELAY2 6\n\nOneWire oneWire(ONE_WIRE_BUS);\nDallasTemperature sensors(&oneWire);\nWebServer server(80);\nbool r1 = false, r2 = false;\n\nvoid applyRelays() {\n  digitalWrite(RELAY1, r1 ? HIGH : LOW);\n  digitalWrite(RELAY2, r2 ? HIGH : LOW);\n}\n\nvoid handleRoot() {\n  sensors.requestTemperatures();\n  float t = sensors.getTempCByIndex(0);\n  String html = \"<!DOCTYPE html><html><body style='background:#111;color:#fff;text-align:center;font-family:Arial'>\";\n  html += \"<h2>ESP32 Temp</h2><p>\" + String(t, 1) + \" C</p>\";\n  html += \"<p>R1:\" + String(r1?\"ON\":\"OFF\") + \" R2:\" + String(r2?\"ON\":\"OFF\") + \"</p>\";\n  html += \"<p><a href='/r1on'>R1 ON</a> <a href='/r1off'>R1 OFF</a></p>\";\n  html += \"<p><a href='/r2on'>R2 ON</a> <a href='/r2off'>R2 OFF</a></p></body></html>\";\n  server.send(200, \"text/html\", html);\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(RELAY1, OUTPUT);\n  pinMode(RELAY2, OUTPUT);\n  applyRelays();\n  sensors.begin();\n  WiFi.softAP(ap_ssid, ap_pass);\n  Serial.println(WiFi.softAPIP());\n  server.on(\"/\", handleRoot);\n  server.on(\"/r1on\", []() { r1 = true; applyRelays(); server.sendHeader(\"Location\", \"/\"); server.send(303); });\n  server.on(\"/r1off\", []() { r1 = false; applyRelays(); server.sendHeader(\"Location\", \"/\"); server.send(303); });\n  server.on(\"/r2on\", []() { r2 = true; applyRelays(); server.sendHeader(\"Location\", \"/\"); server.send(303); });\n  server.on(\"/r2off\", []() { r2 = false; applyRelays(); server.sendHeader(\"Location\", \"/\"); server.send(303); });\n  server.begin();\n}\n\nvoid loop() { server.handleClient(); }\n",
     "schemaImage": "images/002.jpg"
+  },
+  {
+    "id": "003",
+    "title": "Proiect #003",
+    "short": "Descriere scurtă",
+    "board": "NodeMCU ESP8266",
+    "tags": [
+      "ESP8266"
+    ],
+    "tiktok": "În video scrii: Proiect #003 · Link în bio",
+    "sketchName": "proiect_003.ino",
+    "wiring": [
+      [
+        "Componentă",
+        "Pin ESP"
+      ],
+      [
+        "",
+        ""
+      ]
+    ],
+    "steps": [
+      "Upload sketch pe board."
+    ],
+    "warnings": [
+      "Nu lega 230V la pinii ESP."
+    ],
+    "sketch": "// Sketch Arduino / ESP\nvoid setup() {}\nvoid loop() {}\n",
+    "schemaImage": ""
   }
 ]
