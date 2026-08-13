@@ -26,6 +26,7 @@ Site static (GitHub Pages) + Manager Python (GUI CustomTkinter):
 | `bin_builder.py` | Compilare / import `.bin` (preferă `merged.bin` pe ESP32) |
 | `firmware/` | `001.bin`, `003.bin` + manifeste |
 | `images/` | Scheme foto |
+| `fritzing/` | Scheme `.fzz` (Fritzing) — buton **Deschide Fritzing** în tab Cablare |
 | `.github/workflows/pages.yml` | Deploy GitHub Pages |
 
 ## Proiecte (stare)

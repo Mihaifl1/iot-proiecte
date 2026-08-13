@@ -15,6 +15,7 @@ import subprocess
 import sys
 import threading
 import webbrowser
+import zipfile
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -39,8 +40,10 @@ DATA_DIR = ROOT / "data"
 JSON_PATH = DATA_DIR / "projects.json"
 JS_PATH = ROOT / "projects-data.js"
 IMAGES_DIR = ROOT / "images"
+FRITZING_DIR = ROOT / "fritzing"
 INDEX_PATH = ROOT / "index.html"
 SETTINGS_PATH = DATA_DIR / "manager-settings.json"
+FRITZING_DOWNLOAD = "https://fritzing.org/download/"
 REMOTE_NAME = "origin"
 BRANCH = "main"
 
@@ -185,8 +188,90 @@ def normalize_id(raw: str) -> str:
 
 # ── Settings ────────────────────────────────────────────────────────────────
 
+def find_fritzing_exe(settings: dict[str, Any] | None = None) -> Path | None:
+    """Caută Fritzing.exe (setare salvată, PATH, locuri uzuale Windows)."""
+    candidates: list[Path] = []
+    cfg = settings if settings is not None else load_settings()
+    saved = str(cfg.get("fritzing_exe") or "").strip()
+    if saved:
+        candidates.append(Path(saved))
+    which = shutil.which("Fritzing") or shutil.which("fritzing")
+    if which:
+        candidates.append(Path(which))
+    home = Path.home()
+    extras = [
+        Path(os.environ.get("ProgramFiles", r"C:\Program Files")) / "Fritzing" / "Fritzing.exe",
+        Path(os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)")) / "Fritzing" / "Fritzing.exe",
+        home / "AppData" / "Local" / "Fritzing" / "Fritzing.exe",
+        home / "AppData" / "Local" / "Programs" / "Fritzing" / "Fritzing.exe",
+        ROOT / "tools" / "Fritzing" / "Fritzing.exe",
+        home / "Desktop" / "Fritzing" / "Fritzing.exe",
+    ]
+    # portable extrasctrat în Downloads
+    downloads = home / "Downloads"
+    if downloads.is_dir():
+        extras.extend(downloads.glob("Fritzing*/Fritzing.exe"))
+    candidates.extend(extras)
+    seen: set[str] = set()
+    for p in candidates:
+        try:
+            key = str(p.resolve()) if p.exists() else str(p)
+        except OSError:
+            key = str(p)
+        if key in seen:
+            continue
+        seen.add(key)
+        if p.is_file():
+            return p
+    return None
+
+
+def fritzing_path_for(pid: str) -> Path:
+    return FRITZING_DIR / f"{pid}.fzz"
+
+
+def ensure_fritzing_sketch(pid: str, title: str = "") -> Path:
+    """Creează un .fzz gol (zip + .fz) dacă lipsește. Fritzing îl deschide ca sketch nou."""
+    FRITZING_DIR.mkdir(parents=True, exist_ok=True)
+    dest = fritzing_path_for(pid)
+    if dest.exists() and dest.stat().st_size > 40:
+        return dest
+    name = re.sub(r"[^\w\-]+", "_", (title or f"Proiect_{pid}").strip()) or f"Proiect_{pid}"
+    fz_name = f"{name}.fz"
+    xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        f'<module fritzingVersion="1.0.4">\n'
+        f"    <title>{_xml_escape(title or f'Proiect #{pid}')}</title>\n"
+        "    <description>Schemă desenată din Manager IoT</description>\n"
+        "    <views>\n"
+        '        <view name="breadboardView" backgroundColor="#ffffff" '
+        'gridSize="0.1in" showGrid="1" alignToGrid="1" viewFromBelow="0"/>\n'
+        '        <view name="schematicView" backgroundColor="#ffffff" '
+        'gridSize="0.1in" showGrid="1" alignToGrid="1" viewFromBelow="0"/>\n'
+        '        <view name="pcbView" backgroundColor="#333333" '
+        'gridSize="0.05in" showGrid="1" alignToGrid="1" viewFromBelow="0"/>\n'
+        "    </views>\n"
+        "    <instances>\n"
+        "    </instances>\n"
+        "</module>\n"
+    )
+    with zipfile.ZipFile(dest, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        zf.writestr(fz_name, xml)
+    return dest
+
+
+def _xml_escape(s: str) -> str:
+    return (
+        str(s)
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace('"', "&quot;")
+    )
+
+
 def load_settings() -> dict[str, Any]:
-    defaults = {"auto_github": True}
+    defaults = {"auto_github": True, "fritzing_exe": ""}
     if not SETTINGS_PATH.exists():
         return defaults
     try:
@@ -628,6 +713,49 @@ class ManagerApp(ctk.CTk):
         wrap = ctk.CTkFrame(self.tab_wiring, fg_color="transparent")
         wrap.pack(fill="both", expand=True, padx=8, pady=8)
 
+        fz_bar = ctk.CTkFrame(wrap, fg_color=COLORS["card"], corner_radius=10)
+        fz_bar.pack(fill="x", pady=(0, 10))
+        fz_left = ctk.CTkFrame(fz_bar, fg_color="transparent")
+        fz_left.pack(side="left", fill="x", expand=True, padx=10, pady=8)
+        ctk.CTkLabel(
+            fz_left,
+            text="Schemă Fritzing",
+            font=ctk.CTkFont(size=13, weight="bold"),
+            text_color=COLORS["text"],
+            anchor="w",
+        ).pack(anchor="w")
+        ctk.CTkLabel(
+            fz_left,
+            text="Deschide Fritzing, desenează breadboard / schematic, apoi File → Export → as Image (PNG)\n"
+            "și încarcă imaginea din tab-ul Schemă foto.",
+            text_color=COLORS["muted"],
+            justify="left",
+            font=ctk.CTkFont(size=12),
+            anchor="w",
+        ).pack(anchor="w", pady=(2, 0))
+        fz_btns = ctk.CTkFrame(fz_bar, fg_color="transparent")
+        fz_btns.pack(side="right", padx=10, pady=8)
+        ctk.CTkButton(
+            fz_btns,
+            text="Deschide Fritzing",
+            width=150,
+            height=36,
+            fg_color=COLORS["green"],
+            hover_color="#16a34a",
+            text_color="#052e16",
+            font=ctk.CTkFont(weight="bold"),
+            command=self._open_fritzing,
+        ).pack(side="top")
+        ctk.CTkButton(
+            fz_btns,
+            text="Alege Fritzing.exe…",
+            width=150,
+            height=28,
+            fg_color="#334155",
+            hover_color="#475569",
+            command=self._pick_fritzing_exe,
+        ).pack(side="top", pady=(6, 0))
+
         head = ctk.CTkFrame(wrap, fg_color="transparent")
         head.pack(fill="x", pady=(0, 8))
         ctk.CTkLabel(
@@ -832,6 +960,16 @@ class ManagerApp(ctk.CTk):
             fg_color="#444",
             command=lambda: self.ent_schema.delete(0, "end"),
         ).pack(side="left")
+        ctk.CTkButton(
+            row,
+            text="Deschide Fritzing",
+            width=140,
+            height=36,
+            fg_color=COLORS["green"],
+            hover_color="#16a34a",
+            text_color="#052e16",
+            command=self._open_fritzing,
+        ).pack(side="left", padx=(8, 0))
 
         self.schema_preview = ctk.CTkLabel(
             f,
@@ -1016,6 +1154,7 @@ class ManagerApp(ctk.CTk):
             "warnings": warns,
             "sketch": self.txt_sketch.get("1.0", "end").rstrip("\n") + "\n",
             "schemaImage": self.ent_schema.get().strip(),
+            "fritzingFile": f"fritzing/{pid}.fzz" if fritzing_path_for(pid).exists() else "",
             "chipFamily": chip,
             "firmwareBin": fw,
             "firmwareManifest": f"firmware/{pid}.manifest.json" if fw else "",
@@ -1316,6 +1455,70 @@ class ManagerApp(ctk.CTk):
         self.ent_sketch_name.delete(0, "end")
         self.ent_sketch_name.insert(0, name)
         self._dirty = True
+
+    def _pick_fritzing_exe(self) -> None:
+        path = filedialog.askopenfilename(
+            title="Alege Fritzing.exe",
+            filetypes=[("Fritzing", "Fritzing.exe"), ("Executabil", "*.exe"), ("Toate", "*.*")],
+        )
+        if not path:
+            return
+        exe = Path(path)
+        if not exe.is_file():
+            messagebox.showerror("Eroare", "Fișier invalid.")
+            return
+        self._settings["fritzing_exe"] = str(exe)
+        save_settings(self._settings)
+        self.status_lbl.configure(text=f"Fritzing: {exe}")
+        messagebox.showinfo("Fritzing", f"Salvat:\n{exe}\n\nApasă «Deschide Fritzing» ca să desenezi schema.")
+
+    def _open_fritzing(self) -> None:
+        if self.current_index is None:
+            messagebox.showinfo("Info", "Selectează un proiect din listă.")
+            return
+        pid = normalize_id(self.ent_id.get()) or self.projects[self.current_index].get("id", "000")
+        title = self.ent_title.get().strip() or f"Proiect #{pid}"
+
+        exe = find_fritzing_exe(self._settings)
+        if exe is None:
+            if messagebox.askyesno(
+                "Fritzing lipsește",
+                "Nu găsesc Fritzing pe acest PC.\n\n"
+                "Da = alege Fritzing.exe (dacă e deja instalat / portable)\n"
+                "Nu = deschide pagina de download (fritzing.org)",
+            ):
+                self._pick_fritzing_exe()
+                exe = find_fritzing_exe(self._settings)
+            else:
+                webbrowser.open(FRITZING_DOWNLOAD)
+                return
+            if exe is None:
+                return
+
+        try:
+            fzz = ensure_fritzing_sketch(str(pid), title)
+        except OSError as e:
+            messagebox.showerror("Eroare", f"Nu pot crea fișierul Fritzing:\n{e}")
+            return
+
+        try:
+            if sys.platform == "win32":
+                subprocess.Popen(
+                    [str(exe), str(fzz)],
+                    cwd=str(exe.parent),
+                    close_fds=True,
+                )
+            else:
+                subprocess.Popen([str(exe), str(fzz)])
+        except OSError as e:
+            messagebox.showerror("Eroare", f"Nu pot porni Fritzing:\n{e}")
+            return
+
+        self.status_lbl.configure(text=f"Fritzing deschis · {fzz.name}")
+        # reține calea în proiectul curent (fără salvare completă)
+        if self.current_index is not None:
+            self.projects[self.current_index]["fritzingFile"] = f"fritzing/{pid}.fzz"
+            self._dirty = True
 
     def _pick_schema(self) -> None:
         path = filedialog.askopenfilename(
