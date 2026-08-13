@@ -172,7 +172,15 @@ window.PROJECTS = [
       "clonează repo-ul și continuă proiectul IoT de acolo"
     ],
     "warnings": [
-      "Nu lega 230V la pinii ESP."
+      "Lucrez la https://github.com/Mihaifl1/iot-proiecte",
+      "Citește: https://github.com/Mihaifl1/iot-proiecte/blob/main/GROK-CONTEXT.md",
+      "și README.md din repo.",
+      "Site: https://mihaifl1.github.io/iot-proiecte/",
+      "Manager: python manager.py",
+      "Continuă de aici: [scrie ce vrei să faci]",
+      "Sau scurt:",
+      "@ https://github.com/Mihaifl1/iot-proiecte/blob/main/GROK-CONTEXT.md",
+      "clonează repo-ul și continuă proiectul IoT de acolo"
     ],
     "sketch": "// Sketch Arduino / ESP\nvoid setup() {}\nvoid loop() {}\n",
     "schemaImage": "",
