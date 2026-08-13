@@ -89,6 +89,7 @@ EMPTY_PROJECT: dict[str, Any] = {
     "chipFamily": "ESP8266",
     "firmwareBin": "",
     "firmwareManifest": "",
+    "published": False,
 }
 
 
@@ -135,9 +136,18 @@ def load_from_js() -> list[dict[str, Any]]:
         return []
 
 
+def is_published(project: dict[str, Any]) -> bool:
+    """Lipsă câmp = public (proiecte vechi). False explicit = draft, nu apare pe site."""
+    return project.get("published", True) is not False
+
+
+def public_projects(projects: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [p for p in projects if is_published(p)]
+
+
 def generate_js(projects: list[dict[str, Any]]) -> None:
-    """Scrie projects-data.js din lista de proiecte."""
-    body = json.dumps(projects, ensure_ascii=False, indent=2)
+    """Scrie projects-data.js doar cu proiectele publice."""
+    body = json.dumps(public_projects(projects), ensure_ascii=False, indent=2)
     # indentează cu 2 spații ca în original
     js = (
         "/* Generat automat din data/projects.json — nu edita manual */\n"
@@ -590,15 +600,29 @@ class ManagerApp(ctk.CTk):
         self.ent_tiktok = labeled_entry(f, "Text TikTok", 10)
         self.ent_sketch_name = labeled_entry(f, "Nume fișier sketch (.ino)", 12)
 
+        self.var_published = ctk.BooleanVar(value=True)
+        self.chk_published = ctk.CTkCheckBox(
+            f,
+            text="Public pe site (debifează = draft, nu apare pe GitHub Pages)",
+            variable=self.var_published,
+            font=ctk.CTkFont(size=13),
+            text_color=COLORS["text"],
+            fg_color=COLORS["green"],
+            hover_color="#16a34a",
+            border_color=COLORS["border"],
+        )
+        self.chk_published.grid(row=14, column=0, sticky="w", padx=12, pady=(14, 4))
+
         tip = ctk.CTkLabel(
             f,
             text="Pe pagina principală apar: #număr · titlu · descriere · board · tag-uri.\n"
-            "Pe pagina proiectului: toate câmpurile + cablare, pași, sketch, schemă.",
+            "Pe pagina proiectului: toate câmpurile + cablare, pași, sketch, schemă.\n"
+            "Draft-urile rămân în Manager și în data/projects.json, nu pe site.",
             text_color=COLORS["muted"],
             justify="left",
             font=ctk.CTkFont(size=12),
         )
-        tip.grid(row=14, column=0, sticky="w", padx=12, pady=16)
+        tip.grid(row=16, column=0, sticky="w", padx=12, pady=16)
 
     def _build_wiring_tab(self) -> None:
         wrap = ctk.CTkFrame(self.tab_wiring, fg_color="transparent")
@@ -853,9 +877,10 @@ class ManagerApp(ctk.CTk):
             title = p.get("title", "Fără titlu")
             short = p.get("short", "")
             selected = idx == self.current_index
+            draft = "" if is_published(p) else "  · draft"
             btn = ctk.CTkButton(
                 self.list_frame,
-                text=f"  #{pid}  {title}\n  {short[:48]}",
+                text=f"  #{pid}  {title}{draft}\n  {short[:48]}",
                 anchor="w",
                 height=58,
                 fg_color=COLORS["selected"] if selected else COLORS["card"],
@@ -914,6 +939,10 @@ class ManagerApp(ctk.CTk):
             self.cmb_chip.set("ESP8266")
         except Exception:
             pass
+        try:
+            self.var_published.set(True)
+        except Exception:
+            pass
 
     def _fill_form(self, p: dict[str, Any]) -> None:
         from bin_builder import infer_chip_family
@@ -928,6 +957,7 @@ class ManagerApp(ctk.CTk):
         self.ent_sketch_name.insert(0, str(p.get("sketchName", "")))
         self.ent_schema.insert(0, str(p.get("schemaImage", "") or ""))
         self.ent_firmware.insert(0, str(p.get("firmwareBin", "") or ""))
+        self.var_published.set(is_published(p))
 
         chip = p.get("chipFamily") or infer_chip_family(
             p.get("board", ""), p.get("tags"), p.get("title", "")
@@ -989,6 +1019,7 @@ class ManagerApp(ctk.CTk):
             "chipFamily": chip,
             "firmwareBin": fw,
             "firmwareManifest": f"firmware/{pid}.manifest.json" if fw else "",
+            "published": bool(self.var_published.get()),
         }
 
     def _fw_log(self, text: str) -> None:
@@ -1238,16 +1269,20 @@ class ManagerApp(ctk.CTk):
         generate_js(self.projects)
         self._dirty = False
         self._refresh_list()
-        self.status_lbl.configure(text=f"Site generat · {len(self.projects)} proiecte")
+        n_pub = len(public_projects(self.projects))
+        n_draft = len(self.projects) - n_pub
+        extra = f" · {n_draft} draft" if n_draft else ""
+        self.status_lbl.configure(text=f"Site generat · {n_pub} publice{extra}")
         if self.auto_gh_var.get():
             self._sync_github(
-                f"Generează site — {len(self.projects)} proiecte", silent=True
+                f"Generează site — {n_pub} proiecte publice", silent=True
             )
         else:
             messagebox.showinfo(
                 "Site generat",
-                f"projects-data.js actualizat cu {len(self.projects)} proiecte.\n\n"
-                "Auto GitHub e OFF — apasă „Push GitHub” pentru online.",
+                f"projects-data.js actualizat cu {n_pub} proiecte publice"
+                + (f" ({n_draft} draft ascunse)." if n_draft else ".")
+                + "\n\nAuto GitHub e OFF — apasă „Push GitHub” pentru online.",
             )
 
     def _preview(self) -> None:

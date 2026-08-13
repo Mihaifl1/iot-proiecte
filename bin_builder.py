@@ -27,7 +27,8 @@ CHIP_FAMILIES = ("ESP8266", "ESP32", "ESP32-C3", "ESP32-S2", "ESP32-S3", "ESP32-
 CHIP_FQBN = {
     "ESP8266": "esp8266:esp8266:nodemcuv2",
     "ESP32": "esp32:esp32:esp32",
-    "ESP32-C3": "esp32:esp32:esp32c3",
+    # Super Mini / majoritatea C3: USB-CDC pe boot, altfel Serial dispare după flash
+    "ESP32-C3": "esp32:esp32:esp32c3:CDCOnBoot=cdc",
     "ESP32-S2": "esp32:esp32:esp32s2",
     "ESP32-S3": "esp32:esp32:esp32s3",
     "ESP32-C6": "esp32:esp32:esp32c6",
@@ -225,6 +226,57 @@ def import_bin_file(
     return True, f"BIN importat: {dest} ({size_kb:.1f} KB)", project
 
 
+def _score_app_bin(path: Path, sketch_name: str) -> int:
+    n = path.name.lower()
+    s = 0
+    if sketch_name.lower() in n:
+        s += 10
+    if "merged" in n:
+        s += 40
+    if "bootloader" in n or "partitions" in n or "boot_app0" in n:
+        s -= 30
+    if n.endswith(".ino.bin") or n == f"{sketch_name}.bin".lower():
+        s += 5
+    return s
+
+
+def _pick_and_store_bin(
+    out_dir: Path, sketch_name: str, chip: str, pid: str
+) -> tuple[bool, str, Path | None, str | None]:
+    """
+    Alege imaginea corectă pentru flash din browser (offset 0).
+    Preferă *.merged.bin (ESP32: bootloader+partitions+app).
+    ESP8266: sketch.ino.bin e suficient la 0x0.
+    """
+    bins = list(out_dir.glob("*.bin"))
+    if not bins:
+        return False, "Compilare OK dar nu există .bin în output.", None, None
+
+    FIRMWARE_DIR.mkdir(parents=True, exist_ok=True)
+    dest_name = f"{pid}.bin"
+    dest = FIRMWARE_DIR / dest_name
+
+    merged = [p for p in bins if "merged" in p.name.lower()]
+    if merged:
+        merged.sort(key=lambda p: p.stat().st_size, reverse=True)
+        shutil.copy2(merged[0], dest)
+        return True, f"Folosit merged image ({merged[0].name}) — flash la offset 0.", dest, dest_name
+
+    bins.sort(key=lambda p: _score_app_bin(p, sketch_name), reverse=True)
+    src = bins[0]
+    shutil.copy2(src, dest)
+
+    if chip.upper().startswith("ESP32") and "merged" not in src.name.lower():
+        return (
+            True,
+            f"Folosit {src.name}. Pe ESP32, merged.bin e preferat; "
+            "dacă flash-ul din browser eșuează, Importă BIN merged din Arduino IDE.",
+            dest,
+            dest_name,
+        )
+    return True, f"Folosit {src.name}.", dest, dest_name
+
+
 def compile_project(project: dict[str, Any], auto_download_cli: bool = True) -> tuple[bool, str, dict[str, Any]]:
     """
     Compilează sketch-ul din project → firmware/{id}.bin.
@@ -301,35 +353,19 @@ def compile_project(project: dict[str, Any], auto_download_cli: bool = True) -> 
             tail = "\n".join(log.splitlines()[-40:])
             return False, f"Compilare eșuată (FQBN {fqbn}):\n{tail}", project
 
-        # găsește .bin (preferă fișierul principal, nu .bootloader / .partitions pe esp32)
-        bins = list(out_dir.glob("*.bin"))
-        if not bins:
-            return False, f"Compilare OK dar nu există .bin în output.\n{log[-500:]}", project
+        ok_pick, pick_msg, dest, dest_name = _pick_and_store_bin(
+            out_dir, sketch_name, chip, pid
+        )
+        if not ok_pick or dest is None or dest_name is None:
+            return False, pick_msg or f"Nu am putut alege .bin.\n{log[-400:]}", project
 
-        def score(p: Path) -> int:
-            n = p.name.lower()
-            s = 0
-            if sketch_name.lower() in n:
-                s += 10
-            if "bootloader" in n or "partitions" in n:
-                s -= 20
-            if n.endswith(".ino.bin") or n == f"{sketch_name}.bin".lower():
-                s += 5
-            return s
-
-        bins.sort(key=score, reverse=True)
-        src_bin = bins[0]
-
-        FIRMWARE_DIR.mkdir(parents=True, exist_ok=True)
-        dest_name = f"{pid}.bin"
-        dest = FIRMWARE_DIR / dest_name
-        shutil.copy2(src_bin, dest)
         write_manifest(project, dest_name)
         project["firmwareBin"] = f"firmware/{dest_name}"
         project["firmwareManifest"] = f"firmware/{pid}.manifest.json"
         size_kb = dest.stat().st_size / 1024
         return (
             True,
-            f"BIN generat: firmware/{dest_name} ({size_kb:.1f} KB)\nChip: {chip}\nFQBN: {fqbn}",
+            f"BIN generat: firmware/{dest_name} ({size_kb:.1f} KB)\n"
+            f"Chip: {chip}\nFQBN: {fqbn}\n{pick_msg}",
             project,
         )

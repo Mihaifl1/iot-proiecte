@@ -1,5 +1,5 @@
 {
-  "name": "# ESP8266 / NodeMCU Smart Scheduler",
+  "name": "ESP8266 / NodeMCU Smart Scheduler",
   "version": "003",
   "new_install_prompt_erase": true,
   "builds": [

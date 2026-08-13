@@ -33,6 +33,7 @@ Pe PC poți **adăuga, edita și șterge** proiecte din lista de pe pagina princ
 | **+ Proiect nou** | Buton verde-albastru stânga |
 | **Șterge** | Buton roșu (proiectul selectat) |
 | Editează titlu, board, tag-uri, TikTok | Tab **Informații** |
+| **Public pe site** / draft | Tab **Informații** — draft-urile nu apar pe Pages |
 | Tabel cablare | Tab **Cablare** |
 | Pași numerotați | Tab **Pași** |
 | Avertismente | Tab **Avertismente** |
