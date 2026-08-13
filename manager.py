@@ -130,13 +130,15 @@ def load_from_js() -> list[dict[str, Any]]:
     if not JS_PATH.exists():
         return []
     text = JS_PATH.read_text(encoding="utf-8")
-    m = re.search(r"window\.PROJECTS\s*=\s*(\[.*?\]);\s*\n", text, re.S)
-    if not m:
+    key = "window.PROJECTS = "
+    i = text.find(key)
+    if i < 0:
         return []
     try:
-        return json.loads(m.group(1))
+        data, _ = json.JSONDecoder().raw_decode(text, i + len(key))
     except json.JSONDecodeError:
         return []
+    return data if isinstance(data, list) else []
 
 
 def is_published(project: dict[str, Any]) -> bool:
@@ -148,24 +150,57 @@ def public_projects(projects: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [p for p in projects if is_published(p)]
 
 
+# Raw string: \d rămâne \d în JS. Nu concatena linii cu "\\n" — produce \n literal și strică site-ul.
+FIND_PROJECT_JS = r"""window.findProject = function (raw) {
+  if (!raw) return null;
+  var s = String(raw).trim().toUpperCase().replace(/^#/, '').replace(/^P/, '');
+  if (/^\d+$/.test(s)) s = ('000' + s).slice(-3);
+  for (var i = 0; i < window.PROJECTS.length; i++) {
+    if (window.PROJECTS[i].id === s) return window.PROJECTS[i];
+  }
+  return null;
+};
+"""
+
+
+def validate_projects_js(js: str) -> None:
+    """Refuză un projects-data.js care ar opri tot site-ul (JSON / findProject)."""
+    key = "window.PROJECTS = "
+    i = js.find(key)
+    if i < 0:
+        raise ValueError("projects-data.js fără window.PROJECTS. Generare anulată.")
+    try:
+        data, _ = json.JSONDecoder().raw_decode(js, i + len(key))
+    except json.JSONDecodeError as e:
+        raise ValueError(f"PROJECTS nu e JSON valid: {e}") from e
+    if not isinstance(data, list):
+        raise ValueError("window.PROJECTS trebuie să fie o listă.")
+
+    fn = js.find("window.findProject = function")
+    if fn < 0:
+        raise ValueError("projects-data.js fără findProject. Generare anulată.")
+    tail = js[fn:].replace("\r\n", "\n")
+    # Eroarea veche: slice(-3);\n  for  (backslash + n) în loc de linie nouă
+    if "slice(-3);\\n  for" in tail:
+        raise ValueError(
+            "findProject are \\n literal — site-ul nu ar încărca proiectele. Generare anulată."
+        )
+    if "slice(-3);\n  for" not in tail:
+        raise ValueError("findProject e incomplet. Generare anulată.")
+
+
 def generate_js(projects: list[dict[str, Any]]) -> None:
-    """Scrie projects-data.js doar cu proiectele publice."""
+    """Scrie projects-data.js doar cu proiectele publice. Validează înainte de replace."""
     body = json.dumps(public_projects(projects), ensure_ascii=False, indent=2)
-    # indentează cu 2 spații ca în original
     js = (
         "/* Generat automat din data/projects.json — nu edita manual */\n"
         f"window.PROJECTS = {body};\n\n"
-        "window.findProject = function (raw) {\n"
-        "  if (!raw) return null;\n"
-        "  var s = String(raw).trim().toUpperCase().replace(/^#/, '').replace(/^P/, '');\n"
-        "  if (/^\\d+$/.test(s)) s = ('000' + s).slice(-3);\n"
-        "  for (var i = 0; i < window.PROJECTS.length; i++) {\n"
-        "    if (window.PROJECTS[i].id === s) return window.PROJECTS[i];\n"
-        "  }\n"
-        "  return null;\n"
-        "};\n"
+        + FIND_PROJECT_JS
     )
-    JS_PATH.write_text(js, encoding="utf-8")
+    validate_projects_js(js)
+    tmp = JS_PATH.with_name(JS_PATH.name + ".tmp")
+    tmp.write_text(js, encoding="utf-8", newline="\n")
+    os.replace(tmp, JS_PATH)
 
 
 def next_id(projects: list[dict[str, Any]]) -> str:
@@ -1158,8 +1193,28 @@ class ManagerApp(ctk.CTk):
             "chipFamily": chip,
             "firmwareBin": fw,
             "firmwareManifest": f"firmware/{pid}.manifest.json" if fw else "",
-            "published": bool(self.var_published.get()),
+            "published": self._read_published(),
         }
+
+    def _read_published(self) -> bool:
+        try:
+            return bool(self.var_published.get())
+        except Exception:
+            return True
+
+    def _write_data(self) -> bool:
+        """Salvează JSON + JS. Nu lasă un projects-data.js stricat pe disc."""
+        try:
+            save_json(self.projects)
+            generate_js(self.projects)
+            return True
+        except Exception as e:
+            messagebox.showerror(
+                "Eroare la generarea site-ului",
+                "Nu am scris projects-data.js (site-ul rămâne neschimbat):\n\n"
+                f"{e}",
+            )
+            return False
 
     def _fw_log(self, text: str) -> None:
         self.firmware_log.delete("1.0", "end")
@@ -1171,8 +1226,8 @@ class ManagerApp(ctk.CTk):
         if self.current_index is None:
             return
         self.projects[self.current_index] = project
-        save_json(self.projects)
-        generate_js(self.projects)
+        if not self._write_data():
+            return
         self._dirty = False
         self.ent_firmware.delete(0, "end")
         self.ent_firmware.insert(0, project.get("firmwareBin") or "")
@@ -1331,8 +1386,8 @@ class ManagerApp(ctk.CTk):
         self.current_index = len(self.projects) - 1
         self._fill_form(p)
         self._dirty = False
-        save_json(self.projects)
-        generate_js(self.projects)
+        if not self._write_data():
+            return
         self._refresh_list()
         self.status_lbl.configure(text=f"Proiect nou #{p['id']} — completează detaliile")
         self.tabs.set("Informații")
@@ -1353,8 +1408,8 @@ class ManagerApp(ctk.CTk):
         ):
             return
         del self.projects[self.current_index]
-        save_json(self.projects)
-        generate_js(self.projects)
+        if not self._write_data():
+            return
         self._dirty = False
         if self.projects:
             self.current_index = min(self.current_index, len(self.projects) - 1)
@@ -1380,8 +1435,8 @@ class ManagerApp(ctk.CTk):
             if p["id"] == data["id"]:
                 self.current_index = i
                 break
-        save_json(self.projects)
-        generate_js(self.projects)
+        if not self._write_data():
+            return
         self._dirty = False
         self._refresh_list()
         self.status_lbl.configure(text=f"Salvat #{data['id']} local")
@@ -1404,8 +1459,8 @@ class ManagerApp(ctk.CTk):
         self.projects.sort(
             key=lambda x: (int(x["id"]) if str(x.get("id", "")).isdigit() else 9999, x.get("id", ""))
         )
-        save_json(self.projects)
-        generate_js(self.projects)
+        if not self._write_data():
+            return
         self._dirty = False
         self._refresh_list()
         n_pub = len(public_projects(self.projects))
@@ -1433,8 +1488,8 @@ class ManagerApp(ctk.CTk):
             data = self._collect_form()
             if data:
                 self.projects[self.current_index] = data
-                save_json(self.projects)
-                generate_js(self.projects)
+                if not self._write_data():
+                    return
         webbrowser.open(INDEX_PATH.as_uri())
 
     def _load_ino(self) -> None:
