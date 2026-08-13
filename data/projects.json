@@ -142,5 +142,37 @@
     "chipFamily": "ESP8266",
     "firmwareBin": "firmware/003.bin",
     "firmwareManifest": "firmware/003.manifest.json"
+  },
+  {
+    "id": "004",
+    "title": "Proiect #004",
+    "short": "Descriere scurtă",
+    "board": "NodeMCU ESP8266",
+    "tags": [
+      "ESP8266"
+    ],
+    "tiktok": "În video scrii: Proiect #004 · Link în bio",
+    "sketchName": "proiect_004.ino",
+    "wiring": [
+      [
+        "Componentă",
+        "Pin ESP"
+      ],
+      [
+        "",
+        ""
+      ]
+    ],
+    "steps": [
+      "Upload sketch pe board."
+    ],
+    "warnings": [
+      "Nu lega 230V la pinii ESP."
+    ],
+    "sketch": "// Sketch Arduino / ESP\nvoid setup() {}\nvoid loop() {}\n",
+    "schemaImage": "",
+    "chipFamily": "ESP8266",
+    "firmwareBin": "",
+    "firmwareManifest": ""
   }
 ]
