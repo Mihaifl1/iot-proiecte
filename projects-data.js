@@ -152,7 +152,8 @@ window.PROJECTS = [
 window.findProject = function (raw) {
   if (!raw) return null;
   var s = String(raw).trim().toUpperCase().replace(/^#/, '').replace(/^P/, '');
-  if (/^\d+$/.test(s)) s = ('000' + s).slice(-3);\n  for (var i = 0; i < window.PROJECTS.length; i++) {
+  if (/^\d+$/.test(s)) s = ('000' + s).slice(-3);
+  for (var i = 0; i < window.PROJECTS.length; i++) {
     if (window.PROJECTS[i].id === s) return window.PROJECTS[i];
   }
   return null;
