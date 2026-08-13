@@ -16,12 +16,12 @@
     <!-- HUB -->
     <div id="view-hub" class="view active">
       <section class="hero">
-        <h1>Proiecte IoT</h1>
-        <p>Vrei să reproduci un proiect din video? Introdu numărul și primești schema + sketch-ul.</p>
+        <h1 data-i18n="hubTitle">Proiecte IoT</h1>
+        <p data-i18n="hubLead">Vrei să reproduci un proiect din video? Introdu numărul și primești schema + sketch-ul.</p>
       </section>
 
       <div class="num-box">
-        <label for="project-number">Număr proiect</label>
+        <label for="project-number" data-i18n="numLabel">Număr proiect</label>
         <div class="num-row">
           <input
             id="project-number"
@@ -30,18 +30,19 @@
             autocomplete="off"
             placeholder="001"
             maxlength="6"
+            data-i18n-aria="numAria"
             aria-label="Număr proiect"
           />
-          <button type="button" id="btn-go">Deschide</button>
+          <button type="button" id="btn-go" data-i18n="open">Deschide</button>
         </div>
-        <p class="num-hint">Exemple: 001 · 1 · 002 · 003</p>
+        <p class="num-hint" data-i18n="examples">Exemple: 001 · 1 · 002 · 003</p>
         <p class="num-error" id="num-error"></p>
       </div>
 
-      <div class="section-title">Toate proiectele</div>
+      <div class="section-title" data-i18n="allProjects">Toate proiectele</div>
       <div class="list" id="project-list"></div>
 
-      <p class="foot">Schemă + sketch public · ESP8266 / ESP32 · reprodus ușor acasă</p>
+      <p class="foot" data-i18n="foot">Schemă + sketch public · ESP8266 / ESP32 · reprodus ușor acasă</p>
     </div>
 
     <!-- PROJECT (filled by JS) -->
@@ -49,6 +50,7 @@
   </div>
 
   <script src="projects-data.js"></script>
+  <script src="i18n.js"></script>
   <script src="flash.js"></script>
   <script src="app.js"></script>
 </body>

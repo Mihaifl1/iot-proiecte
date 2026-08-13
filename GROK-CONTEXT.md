@@ -20,6 +20,7 @@ Site static (GitHub Pages) + Manager Python (GUI CustomTkinter):
 |-----------------|-----|
 | `data/projects.json` | Sursă de adevăr proiecte (inclusiv draft-uri) |
 | `projects-data.js` | Generat automat — **doar proiectele publice** |
+| `i18n.js` | Limbi site **RO / RU / EN** (selector în antet) |
 | `app.js` | Hub + pagină proiect (hash `#/001`) |
 | `flash.js` | Buton flash ESP + driver USB după placă |
 | `manager.py` | GUI: CRUD, Auto GitHub, firmware, draft/public |
@@ -41,6 +42,7 @@ Site static (GitHub Pages) + Manager Python (GUI CustomTkinter):
 - Culori calme (slate/teal), **fără** desene ESP/Arduino pe homepage
 - **Fără** text tip „TikTok: în video scrii… link în bio” pe paginile proiect
 - Site pentru **utilizatori** care vor să **reproducă** proiecte
+- Limbi site: **RO / RU / EN** (fără a redesena UI-ul)
 - Proiecte incomplete = **draft**, nu se publică
 
 ## Comenzi utile

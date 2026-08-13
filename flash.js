@@ -16,14 +16,14 @@ function loadEspWebTools() {
     s.type = "module";
     s.src = ESP_WEB_TOOLS_SRC;
     s.onerror = () =>
-      reject(new Error("Nu pot încărca ESP Web Tools (verifică internetul)."));
+      reject(new Error(t("flashToolsFail")));
     document.head.appendChild(s);
 
     const t0 = Date.now();
     const wait = () => {
       if (customElements.get("esp-web-install-button")) return resolve();
       if (Date.now() - t0 > 20000) {
-        return reject(new Error("Timeout la încărcarea ESP Web Tools."));
+        return reject(new Error(t("flashTimeout")));
       }
       setTimeout(wait, 80);
     };
@@ -107,27 +107,28 @@ function renderDriverBlock(p) {
     .filter((k) => k !== key)
     .map((k) => {
       const x = USB_DRIVERS[k];
+      const label = t("drv." + k + ".label");
       if (x.href) {
         return `<a href="${x.href}" target="_blank" rel="noopener">${escapeHtmlFlash(
-          x.label
+          label
         )}</a>`;
       }
-      return escapeHtmlFlash(x.label);
+      return escapeHtmlFlash(label);
     })
     .join(" · ");
   const download = d.href
     ? `<a class="btn ghost driver-btn" href="${d.href}" target="_blank" rel="noopener">${escapeHtmlFlash(
-        d.btn
+        t("drv." + key + ".btn")
       )}</a>`
-    : `<p class="driver-ok">Nu trebuie instalat nimic pe Windows 10/11.</p>`;
+    : `<p class="driver-ok">${escapeHtmlFlash(t("driverCdcOk"))}</p>`;
   return `
     <div class="driver-box">
-      <div class="driver-kicker">Driver USB pentru această placă</div>
-      <div class="driver-title">${escapeHtmlFlash(d.label)}</div>
+      <div class="driver-kicker">${escapeHtmlFlash(t("driverKicker"))}</div>
+      <div class="driver-title">${escapeHtmlFlash(t("drv." + key + ".label"))}</div>
       <p class="driver-board">${board}</p>
-      <p class="driver-hint">${escapeHtmlFlash(d.hint)}</p>
+      <p class="driver-hint">${escapeHtmlFlash(t("drv." + key + ".hint"))}</p>
       ${download}
-      <p class="driver-alts">Altă placă / alt cip: ${alts}</p>
+      <p class="driver-alts">${escapeHtmlFlash(t("driverAlts"))} ${alts}</p>
     </div>`;
 }
 
@@ -140,9 +141,8 @@ function renderFlashSection(p) {
   if (!bin) {
     return `
     <section class="panel flash-panel flash-missing" id="flash-panel">
-      <h2>⚡ Încarcă pe ESP (USB)</h2>
-      <p class="flash-note">Nu există încă fișier <strong>.bin</strong> pentru acest proiect.
-      Generează-l din Manager Python → tab <strong>Firmware</strong> → <strong>Generează BIN</strong>.</p>
+      <h2>⚡ ${escapeHtmlFlash(t("flashTitle"))}</h2>
+      <p class="flash-note">${escapeHtmlFlash(t("flashMissing"))}</p>
       <div class="flash-actions">${driverHtml}</div>
     </section>`;
   }
@@ -153,11 +153,8 @@ function renderFlashSection(p) {
 
   return `
     <section class="panel flash-panel flash-ready" id="flash-panel">
-      <h2>⚡ Încarcă pe ESP (USB)</h2>
-      <p class="flash-note">
-        Conectează placa pe USB → instalează driverul dacă Windows nu vede COM →
-        apasă butonul → alege portul. Doar <strong>Chrome</strong> sau <strong>Edge</strong> pe PC.
-      </p>
+      <h2>⚡ ${escapeHtmlFlash(t("flashTitle"))}</h2>
+      <p class="flash-note">${escapeHtmlFlash(t("flashNote"))}</p>
       <div class="flash-meta">
         <span class="tag-pill board">${chip}</span>
         <span class="tag-pill">${binPath}</span>
@@ -167,13 +164,12 @@ function renderFlashSection(p) {
       ${
         serialOk
           ? `<div id="flash-install-host" class="flash-install-host">
-               <button type="button" class="btn flash-btn" id="flash-btn-loading" disabled>Se încarcă…</button>
+               <button type="button" class="btn flash-btn" id="flash-btn-loading" disabled>${escapeHtmlFlash(t("flashLoading"))}</button>
              </div>
-             <p class="flash-hint" id="flash-status">Se pregătește uneltele de flash…</p>
-             <p class="flash-dl"><a href="${binPath}" download>Descarcă .bin</a> (dacă vrei să-l urci cu Arduino IDE / esptool)</p>`
-          : `<p class="num-error show">Browserul tău nu suportă Web Serial.
-             Deschide site-ul în <strong>Chrome</strong> sau <strong>Edge</strong> pe calculator.</p>
-             <p class="flash-dl"><a href="${binPath}" download>Descarcă .bin</a></p>`
+             <p class="flash-hint" id="flash-status">${escapeHtmlFlash(t("flashPrep"))}</p>
+             <p class="flash-dl"><a href="${binPath}" download>${escapeHtmlFlash(t("downloadBin"))}</a> ${escapeHtmlFlash(t("downloadBinHint"))}</p>`
+          : `<p class="num-error show">${escapeHtmlFlash(t("noSerial"))}</p>
+             <p class="flash-dl"><a href="${binPath}" download>${escapeHtmlFlash(t("downloadBin"))}</a></p>`
       }
         </div>
         ${driverHtml}
@@ -196,13 +192,13 @@ async function setupFlashButton(p) {
   };
 
   try {
-    setStatus("Se încarcă uneltele de flash…");
+    setStatus(t("flashPrep"));
     await loadEspWebTools();
   } catch (e) {
     const msg = String(e.message || e);
     setStatus(msg);
     host.innerHTML = `<p class="num-error show">${escapeHtmlFlash(msg)}</p>
-      <p class="flash-dl"><a href="${escapeHtmlFlash(bin)}" download>Descarcă .bin</a></p>`;
+      <p class="flash-dl"><a href="${escapeHtmlFlash(bin)}" download>${escapeHtmlFlash(t("downloadBin"))}</a></p>`;
     return;
   }
 
@@ -238,22 +234,21 @@ async function setupFlashButton(p) {
   activate.type = "button";
   activate.className = "btn flash-btn";
   activate.slot = "activate";
-  activate.textContent = "Încarcă pe ESP";
+  activate.textContent = t("flashBtn");
   btn.appendChild(activate);
 
   const unsup = document.createElement("span");
   unsup.slot = "unsupported";
   unsup.className = "flash-note";
-  unsup.textContent = "Browser incompatibil — folosește Chrome / Edge.";
+  unsup.textContent = t("unsupported");
   btn.appendChild(unsup);
 
   const notAllowed = document.createElement("span");
   notAllowed.slot = "not-allowed";
   notAllowed.className = "flash-note";
-  notAllowed.textContent =
-    "Permisiune serial refuzată sau pagină nesigură (HTTPS necesar).";
+  notAllowed.textContent = t("notAllowed");
   btn.appendChild(notAllowed);
 
   host.appendChild(btn);
-  setStatus("Apasă „Încarcă pe ESP”, alege portul USB, apoi Install.");
+  setStatus(t("flashReady"));
 }

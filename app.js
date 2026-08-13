@@ -35,14 +35,21 @@ function goProject(id) {
 function renderHeader(showBack) {
   const el = $("#site-header");
   if (!el) return;
+  const mid = showBack
+    ? `<a class="back-link" href="#/">${t("backAll")}</a>`
+    : `<span class="back-link">${t("tagline")}</span>`;
   el.innerHTML = `
     <div class="top">
       <a class="brand" href="#/">
         <span class="logo">IoT</span>
-        <span>Proiecte IoT</span>
+        <span>${escapeHtml(t("brand"))}</span>
       </a>
-      ${showBack ? `<a class="back-link" href="#/">← Toate proiectele</a>` : `<span class="back-link">schemă + sketch</span>`}
+      <div class="top-right">
+        ${mid}
+        ${typeof renderLangSwitch === "function" ? renderLangSwitch() : ""}
+      </div>
     </div>`;
+  if (typeof bindLangSwitch === "function") bindLangSwitch(el);
 }
 
 function renderHub() {
@@ -50,14 +57,16 @@ function renderHub() {
   $("#view-hub").classList.add("active");
   $("#view-project").classList.remove("active");
 
+  if (typeof applyStaticI18n === "function") applyStaticI18n();
   const list = $("#project-list");
-  list.innerHTML = PROJECTS.map((p) => {
+  list.innerHTML = PROJECTS.map((raw) => {
+    const p = typeof localizedProject === "function" ? localizedProject(raw) : raw;
     const tags = (p.tags || [])
-      .map((t) => `<span class="tag-pill">${escapeHtml(t)}</span>`)
+      .map((tag) => `<span class="tag-pill">${escapeHtml(tag)}</span>`)
       .join("");
     const hasBin = !!(p.firmwareBin && String(p.firmwareBin).trim());
     const flashBadge = hasBin
-      ? `<span class="tag-pill flash-badge">USB flash</span>`
+      ? `<span class="tag-pill flash-badge">${escapeHtml(t("flashBadge"))}</span>`
       : "";
     return `
     <a class="card" href="#/${p.id}">
@@ -75,7 +84,8 @@ function renderHub() {
   }).join("");
 }
 
-function renderProject(p) {
+function renderProject(raw) {
+  const p = typeof localizedProject === "function" ? localizedProject(raw) : raw;
   renderHeader(true);
   $("#view-hub").classList.remove("active");
   $("#view-project").classList.add("active");
@@ -101,7 +111,7 @@ function renderProject(p) {
 
   $("#view-project").innerHTML = `
     <div class="proj-head">
-      <div class="proj-num">PROIECT #${p.id}</div>
+      <div class="proj-num">${escapeHtml(t("projectLabel", { id: p.id }))}</div>
       <h1>${escapeHtml(p.title)}</h1>
       <p class="sub">${escapeHtml(p.short)} · ${escapeHtml(p.board)}</p>
     </div>
@@ -109,12 +119,12 @@ function renderProject(p) {
     ${flashHtml}
 
     <section class="panel" id="schema">
-      <h2>1. Schema de conectare</h2>
+      <h2>${escapeHtml(t("schemaTitle"))}</h2>
       ${
         p.schemaImage
           ? `<div class="schema-img-wrap"><img class="schema-img" src="${escapeHtml(
               p.schemaImage
-            )}" alt="Schema proiect #${p.id}" loading="lazy"/></div>`
+            )}" alt="${escapeHtml(t("schemaAlt", { id: p.id }))}" loading="lazy"/></div>`
           : ""
       }
       <table>
@@ -125,21 +135,21 @@ function renderProject(p) {
     </section>
 
     <section class="panel">
-      <h2>2. Pași rapizi</h2>
+      <h2>${escapeHtml(t("stepsTitle"))}</h2>
       <ol class="steps">${steps}</ol>
     </section>
 
     <section class="panel" id="sketch">
       <div class="code-head">
-        <h2 style="margin:0">3. Sketch (cod sursă)</h2>
-        <button class="btn" type="button" id="btn-copy">Copiază codul</button>
+        <h2 style="margin:0">${escapeHtml(t("sketchTitle"))}</h2>
+        <button class="btn" type="button" id="btn-copy">${escapeHtml(t("copy"))}</button>
       </div>
       <p style="color:var(--muted);font-size:0.88rem;margin:0 0 8px">${escapeHtml(p.sketchName)}</p>
       <pre id="sketch-code"><code>${escapeHtml(p.sketch)}</code></pre>
     </section>
 
     <p style="margin-top:16px">
-      <a class="btn ghost" href="#/">← Alt proiect (introdu numărul)</a>
+      <a class="btn ghost" href="#/">${escapeHtml(t("otherProject"))}</a>
     </p>
   `;
 
@@ -147,7 +157,7 @@ function renderProject(p) {
     navigator.clipboard.writeText(p.sketch).then(() => {
       const b = $("#btn-copy");
       const old = b.textContent;
-      b.textContent = "Copiat!";
+      b.textContent = t("copied");
       setTimeout(() => (b.textContent = old), 1500);
     });
   };
@@ -162,7 +172,7 @@ function openFromInput() {
   const err = $("#num-error");
   const p = findProject(raw);
   if (!p) {
-    err.textContent = "Nu există proiectul #" + String(raw).trim() + ". Încearcă 001, 002, 003…";
+    err.textContent = t("notFound", { id: String(raw).trim() });
     err.classList.add("show");
     return;
   }
@@ -181,7 +191,7 @@ function route() {
     renderHub();
     const err = $("#num-error");
     if (err) {
-      err.textContent = "Proiectul #" + id + " nu există.";
+      err.textContent = t("notFoundId", { id: id });
       err.classList.add("show");
     }
     return;
@@ -191,6 +201,7 @@ function route() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  if (typeof setLang === "function") setLang(getLang());
   if (!location.hash) location.hash = "#/";
   $("#btn-go").addEventListener("click", openFromInput);
   $("#project-number").addEventListener("keydown", (e) => {
