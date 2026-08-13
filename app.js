@@ -55,6 +55,10 @@ function renderHub() {
     const tags = (p.tags || [])
       .map((t) => `<span class="tag-pill">${escapeHtml(t)}</span>`)
       .join("");
+    const hasBin = !!(p.firmwareBin && String(p.firmwareBin).trim());
+    const flashBadge = hasBin
+      ? `<span class="tag-pill flash-badge">USB flash</span>`
+      : "";
     return `
     <a class="card" href="#/${p.id}">
       <div class="badge-num">#${p.id}</div>
@@ -64,6 +68,7 @@ function renderHub() {
         <div class="meta">
           <span class="tag-pill board">${escapeHtml(p.board)}</span>
           ${tags}
+          ${flashBadge}
         </div>
       </div>
     </a>`;
@@ -91,12 +96,17 @@ function renderProject(p) {
     .map((s) => `<li>${escapeHtml(s)}</li>`)
     .join("");
 
+  const flashHtml =
+    typeof renderFlashSection === "function" ? renderFlashSection(p) : "";
+
   $("#view-project").innerHTML = `
     <div class="proj-head">
       <div class="proj-num">PROIECT #${p.id}</div>
       <h1>${escapeHtml(p.title)}</h1>
       <p class="sub">${escapeHtml(p.short)} · ${escapeHtml(p.board)}</p>
     </div>
+
+    ${flashHtml}
 
     <section class="panel" id="schema">
       <h2>1. Schema de conectare</h2>
@@ -118,8 +128,6 @@ function renderProject(p) {
       <h2>2. Pași rapizi</h2>
       <ol class="steps">${steps}</ol>
     </section>
-
-    ${typeof renderFlashSection === "function" ? renderFlashSection(p) : ""}
 
     <section class="panel" id="sketch">
       <div class="code-head">

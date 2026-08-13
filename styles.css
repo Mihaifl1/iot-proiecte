@@ -432,7 +432,20 @@ pre {
   padding-top: 8px;
 }
 
-/* Flash pe ESP */
+/* Flash pe ESP — panou vizibil sus pe pagina proiectului */
+.flash-panel {
+  border: 1px solid rgba(94, 184, 168, 0.35) !important;
+  background: linear-gradient(
+    160deg,
+    rgba(94, 184, 168, 0.12) 0%,
+    var(--card) 55%
+  ) !important;
+  margin-bottom: 16px;
+}
+.flash-panel h2 {
+  color: #b8e6dc !important;
+  font-size: 1.1rem !important;
+}
 .flash-panel .flash-note {
   margin: 0 0 12px;
   color: var(--muted);
@@ -440,37 +453,69 @@ pre {
   line-height: 1.5;
 }
 .flash-panel.flash-missing {
-  border-style: dashed;
+  border-style: dashed !important;
+  border-color: var(--border) !important;
+  background: var(--card) !important;
   opacity: 0.95;
 }
 .flash-meta {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 .flash-install-host {
-  margin: 8px 0;
+  margin: 10px 0 6px;
+  min-height: 48px;
 }
 .flash-btn,
 esp-web-install-button {
   display: inline-block;
 }
+button.flash-btn,
 .flash-btn {
-  min-width: 160px;
-  padding: 12px 18px;
-  font-size: 1rem;
-  background: linear-gradient(145deg, #5eb8a8, #4a9e90) !important;
-  box-shadow: 0 4px 14px rgba(94, 184, 168, 0.28);
+  min-width: 200px;
+  padding: 14px 22px !important;
+  font-size: 1.05rem !important;
+  font-weight: 800 !important;
+  border: 0 !important;
+  border-radius: 14px !important;
+  color: #042f2e !important;
+  background: linear-gradient(145deg, #7dd3c4, #5eb8a8) !important;
+  box-shadow: 0 6px 18px rgba(94, 184, 168, 0.35) !important;
+  cursor: pointer;
+}
+button.flash-btn:hover,
+.flash-btn:hover {
+  filter: brightness(1.06);
+}
+button.flash-btn:disabled {
+  opacity: 0.65;
+  cursor: wait;
 }
 .flash-hint {
   margin: 10px 0 0;
   font-size: 0.84rem;
   color: #6b7c8e;
 }
-/* stil intern esp-web-tools slot buttons if plain */
-esp-web-install-button button[slot="activate"],
-esp-web-install-button .flash-btn {
+.flash-dl {
+  margin: 10px 0 0;
+  font-size: 0.82rem;
+  color: #6b7c8e;
+}
+.flash-dl a {
+  color: var(--teal);
+}
+.tag-pill.flash-badge {
+  background: rgba(94, 184, 168, 0.16);
+  color: #9ecfc4;
+  border-color: rgba(94, 184, 168, 0.35);
+}
+/* esp-web-tools custom element */
+esp-web-install-button {
+  display: inline-block;
+}
+esp-web-install-button button[slot="activate"] {
   cursor: pointer;
 }
 
