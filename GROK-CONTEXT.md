@@ -11,7 +11,7 @@ Site static (GitHub Pages) + Manager Python (GUI CustomTkinter):
 1. Utilizatorul introduce **numărul proiectului** din video → vede **schemă**, **pași**, **sketch**, eventual **flash USB**.
 2. Pe PC, `manager.py` editează proiecte, generează `projects-data.js`, face **push automat pe GitHub**.
 3. Tab **Firmware**: **Generează BIN** (arduino-cli) sau **Importă BIN** → `firmware/00X.bin`.
-4. Pe site: buton **Încarcă pe ESP** (Chrome/Edge + Web Serial, ESP Web Tools) — panou sus pe pagina proiectului.
+4. Pe site: buton **Încarcă pe ESP** + **driver USB** potrivit plăcii (CH340 / CP2102 / CH9102 / USB nativ). Override: câmp `usbChip` în Manager → Firmware.
 5. Checkbox **Public pe site** în tab Informații: draft-urile rămân în Manager, **nu** apar pe Pages.
 
 ## Structură importantă
@@ -21,7 +21,7 @@ Site static (GitHub Pages) + Manager Python (GUI CustomTkinter):
 | `data/projects.json` | Sursă de adevăr proiecte (inclusiv draft-uri) |
 | `projects-data.js` | Generat automat — **doar proiectele publice** |
 | `app.js` | Hub + pagină proiect (hash `#/001`) |
-| `flash.js` | Buton flash ESP din browser |
+| `flash.js` | Buton flash ESP + driver USB după placă |
 | `manager.py` | GUI: CRUD, Auto GitHub, firmware, draft/public |
 | `bin_builder.py` | Compilare / import `.bin` (preferă `merged.bin` pe ESP32) |
 | `firmware/` | `001.bin`, `003.bin` + manifeste |

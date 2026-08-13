@@ -464,6 +464,71 @@ pre {
   gap: 8px;
   margin-bottom: 14px;
 }
+.flash-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: stretch;
+  margin-top: 4px;
+}
+.flash-action-main {
+  flex: 1 1 220px;
+  min-width: 200px;
+}
+.driver-box {
+  flex: 1 1 240px;
+  min-width: 220px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(91, 159, 212, 0.28);
+  background: rgba(15, 20, 25, 0.4);
+}
+.driver-kicker {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #8b9aab;
+  margin-bottom: 4px;
+}
+.driver-title {
+  font-weight: 750;
+  font-size: 1rem;
+  color: #d0e8f6;
+}
+.driver-board {
+  margin: 4px 0 0;
+  font-size: 0.82rem;
+  color: #9ecfc4;
+}
+.driver-hint {
+  margin: 8px 0 10px;
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+a.driver-btn {
+  display: inline-block;
+  margin: 0 0 8px;
+  text-decoration: none;
+}
+a.driver-btn:hover {
+  text-decoration: none;
+}
+.driver-ok {
+  margin: 0 0 8px;
+  font-size: 0.86rem;
+  color: #9ecfc4;
+}
+.driver-alts {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  color: #6b7c8e;
+  line-height: 1.45;
+}
+.driver-alts a {
+  color: var(--accent);
+}
+
 .flash-install-host {
   margin: 10px 0 6px;
   min-height: 48px;

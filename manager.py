@@ -90,6 +90,7 @@ EMPTY_PROJECT: dict[str, Any] = {
     "sketch": "// Sketch Arduino / ESP\nvoid setup() {}\nvoid loop() {}\n",
     "schemaImage": "",
     "chipFamily": "ESP8266",
+    "usbChip": "",
     "firmwareBin": "",
     "firmwareManifest": "",
     "published": False,
@@ -908,6 +909,22 @@ class ManagerApp(ctk.CTk):
         self.cmb_chip.set("ESP8266")
         self.cmb_chip.pack(anchor="w", pady=(4, 12))
 
+        ctk.CTkLabel(
+            f, text="Cip USB / driver pe site (Auto = după placă)", text_color=COLORS["muted"]
+        ).pack(anchor="w")
+        self.cmb_usb = ctk.CTkComboBox(
+            f,
+            values=["Auto", "CH340", "CP2102", "CH9102", "CDC", "FTDI"],
+            height=36,
+            fg_color=COLORS["input"],
+            border_color=COLORS["border"],
+            button_color=COLORS["accent"],
+            dropdown_fg_color=COLORS["card"],
+            width=280,
+        )
+        self.cmb_usb.set("Auto")
+        self.cmb_usb.pack(anchor="w", pady=(4, 12))
+
         ctk.CTkLabel(f, text="Cale firmware pe site", text_color=COLORS["muted"]).pack(anchor="w")
         self.ent_firmware = ctk.CTkEntry(
             f,
@@ -1113,6 +1130,10 @@ class ManagerApp(ctk.CTk):
         except Exception:
             pass
         try:
+            self.cmb_usb.set("Auto")
+        except Exception:
+            pass
+        try:
             self.var_published.set(True)
         except Exception:
             pass
@@ -1139,6 +1160,11 @@ class ManagerApp(ctk.CTk):
             self.cmb_chip.set(chip)
         except Exception:
             self.cmb_chip.set("ESP8266")
+        usb = str(p.get("usbChip") or "").strip().upper() or "Auto"
+        try:
+            self.cmb_usb.set(usb if usb != "AUTO" else "Auto")
+        except Exception:
+            self.cmb_usb.set("Auto")
 
         steps = p.get("steps") or []
         self.txt_steps.insert("1.0", "\n".join(steps))
@@ -1175,6 +1201,12 @@ class ManagerApp(ctk.CTk):
 
         fw = self.ent_firmware.get().strip()
         chip = self.cmb_chip.get().strip() or "ESP8266"
+        usb_raw = ""
+        try:
+            usb_raw = self.cmb_usb.get().strip()
+        except Exception:
+            usb_raw = ""
+        usb = "" if not usb_raw or usb_raw.lower() == "auto" else usb_raw.upper()
         return {
             "id": pid,
             "title": self.ent_title.get().strip() or "Fără titlu",
@@ -1191,6 +1223,7 @@ class ManagerApp(ctk.CTk):
             "schemaImage": self.ent_schema.get().strip(),
             "fritzingFile": f"fritzing/{pid}.fzz" if fritzing_path_for(pid).exists() else "",
             "chipFamily": chip,
+            "usbChip": usb,
             "firmwareBin": fw,
             "firmwareManifest": f"firmware/{pid}.manifest.json" if fw else "",
             "published": self._read_published(),

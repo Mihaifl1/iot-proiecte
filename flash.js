@@ -46,17 +46,104 @@ function escapeHtmlFlash(s) {
     .replace(/"/g, "&quot;");
 }
 
+const USB_DRIVERS = {
+  CH340: {
+    label: "CH340 / CH341",
+    hint: "NodeMCU, Wemos D1 Mini și majoritatea clonelor ESP8266.",
+    href: "https://www.wch-ic.com/downloads/CH341SER_EXE.html",
+    btn: "Descarcă driver CH340",
+  },
+  CP2102: {
+    label: "CP2102 (Silicon Labs)",
+    hint: "ESP32 DevKit oficial și plăci cu cip CP210x pe USB.",
+    href: "https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers",
+    btn: "Descarcă driver CP2102",
+  },
+  CH9102: {
+    label: "CH9102 / CH343",
+    hint: "Unele ESP32-C3 / S3 (cip WCH lângă USB).",
+    href: "https://www.wch-ic.com/downloads/CH343SER_EXE.html",
+    btn: "Descarcă driver CH9102",
+  },
+  CDC: {
+    label: "USB nativ (CDC)",
+    hint: "ESP32-C3 Super Mini: Windows 10/11 are deja driverul. Dacă nu apare COM, încearcă CH340.",
+    href: "",
+    btn: "",
+  },
+  FTDI: {
+    label: "FTDI FT232",
+    hint: "Plăci cu cip FTDI pe USB.",
+    href: "https://ftdichip.com/drivers/vcp-drivers/",
+    btn: "Descarcă driver FTDI",
+  },
+};
+
+function inferUsbChip(p) {
+  const raw = String(p.usbChip || "").trim().toUpperCase();
+  if (USB_DRIVERS[raw]) return raw;
+  const blob = [p.board, p.chipFamily, p.title, (p.tags || []).join(" ")]
+    .join(" ")
+    .toLowerCase();
+  if (/ch340|ch341|nodemcu|wemos|d1\s*mini|lolin/.test(blob)) return "CH340";
+  if (/cp210/.test(blob)) return "CP2102";
+  if (/ch910|ch343/.test(blob)) return "CH9102";
+  if (/ftdi|ft232/.test(blob)) return "FTDI";
+  if (
+    /esp32/.test(blob) &&
+    /c3|s2|s3|super\s*mini|qt\s*py|feather/.test(blob)
+  ) {
+    return "CDC";
+  }
+  if (/esp32/.test(blob)) return "CP2102";
+  return "CH340";
+}
+
+function renderDriverBlock(p) {
+  const key = inferUsbChip(p);
+  const d = USB_DRIVERS[key];
+  const board = escapeHtmlFlash(p.board || p.chipFamily || "ESP");
+  const alts = Object.keys(USB_DRIVERS)
+    .filter((k) => k !== key)
+    .map((k) => {
+      const x = USB_DRIVERS[k];
+      if (x.href) {
+        return `<a href="${x.href}" target="_blank" rel="noopener">${escapeHtmlFlash(
+          x.label
+        )}</a>`;
+      }
+      return escapeHtmlFlash(x.label);
+    })
+    .join(" · ");
+  const download = d.href
+    ? `<a class="btn ghost driver-btn" href="${d.href}" target="_blank" rel="noopener">${escapeHtmlFlash(
+        d.btn
+      )}</a>`
+    : `<p class="driver-ok">Nu trebuie instalat nimic pe Windows 10/11.</p>`;
+  return `
+    <div class="driver-box">
+      <div class="driver-kicker">Driver USB pentru această placă</div>
+      <div class="driver-title">${escapeHtmlFlash(d.label)}</div>
+      <p class="driver-board">${board}</p>
+      <p class="driver-hint">${escapeHtmlFlash(d.hint)}</p>
+      ${download}
+      <p class="driver-alts">Altă placă / alt cip: ${alts}</p>
+    </div>`;
+}
+
 /**
  * Secțiune vizibilă sus pe pagina proiectului.
  */
 function renderFlashSection(p) {
   const bin = (p.firmwareBin || "").trim();
+  const driverHtml = renderDriverBlock(p);
   if (!bin) {
     return `
     <section class="panel flash-panel flash-missing" id="flash-panel">
       <h2>⚡ Încarcă pe ESP (USB)</h2>
       <p class="flash-note">Nu există încă fișier <strong>.bin</strong> pentru acest proiect.
       Generează-l din Manager Python → tab <strong>Firmware</strong> → <strong>Generează BIN</strong>.</p>
+      <div class="flash-actions">${driverHtml}</div>
     </section>`;
   }
 
@@ -68,13 +155,15 @@ function renderFlashSection(p) {
     <section class="panel flash-panel flash-ready" id="flash-panel">
       <h2>⚡ Încarcă pe ESP (USB)</h2>
       <p class="flash-note">
-        Conectează placa pe USB → apasă butonul → alege portul COM.
-        Doar <strong>Chrome</strong> sau <strong>Edge</strong> pe PC.
+        Conectează placa pe USB → instalează driverul dacă Windows nu vede COM →
+        apasă butonul → alege portul. Doar <strong>Chrome</strong> sau <strong>Edge</strong> pe PC.
       </p>
       <div class="flash-meta">
         <span class="tag-pill board">${chip}</span>
         <span class="tag-pill">${binPath}</span>
       </div>
+      <div class="flash-actions">
+        <div class="flash-action-main">
       ${
         serialOk
           ? `<div id="flash-install-host" class="flash-install-host">
@@ -86,6 +175,9 @@ function renderFlashSection(p) {
              Deschide site-ul în <strong>Chrome</strong> sau <strong>Edge</strong> pe calculator.</p>
              <p class="flash-dl"><a href="${binPath}" download>Descarcă .bin</a></p>`
       }
+        </div>
+        ${driverHtml}
+      </div>
     </section>`;
 }
 
