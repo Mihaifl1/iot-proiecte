@@ -3,3 +3,6 @@ __pycache__/
 .DS_Store
 Thumbs.db
 data/manager-settings.json
+tools/
+build_tmp/
+*.zip

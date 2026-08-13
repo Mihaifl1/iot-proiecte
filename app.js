@@ -119,9 +119,11 @@ function renderProject(p) {
       <ol class="steps">${steps}</ol>
     </section>
 
+    ${typeof renderFlashSection === "function" ? renderFlashSection(p) : ""}
+
     <section class="panel" id="sketch">
       <div class="code-head">
-        <h2 style="margin:0">3. Sketch gata de upload</h2>
+        <h2 style="margin:0">3. Sketch (cod sursă)</h2>
         <button class="btn" type="button" id="btn-copy">Copiază codul</button>
       </div>
       <p style="color:var(--muted);font-size:0.88rem;margin:0 0 8px">${escapeHtml(p.sketchName)}</p>
@@ -141,6 +143,10 @@ function renderProject(p) {
       setTimeout(() => (b.textContent = old), 1500);
     });
   };
+
+  if (typeof setupFlashButton === "function") {
+    setupFlashButton(p);
+  }
 }
 
 function openFromInput() {

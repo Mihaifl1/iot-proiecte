@@ -86,6 +86,9 @@ EMPTY_PROJECT: dict[str, Any] = {
     "warnings": ["Nu lega 230V la pinii ESP."],
     "sketch": "// Sketch Arduino / ESP\nvoid setup() {}\nvoid loop() {}\n",
     "schemaImage": "",
+    "chipFamily": "ESP8266",
+    "firmwareBin": "",
+    "firmwareManifest": "",
 }
 
 
@@ -555,6 +558,7 @@ class ManagerApp(ctk.CTk):
         self.tab_steps = self.tabs.add("Pași")
         self.tab_warn = self.tabs.add("Avertismente")
         self.tab_sketch = self.tabs.add("Sketch")
+        self.tab_firmware = self.tabs.add("Firmware")
         self.tab_schema = self.tabs.add("Schemă foto")
 
         self._build_info_tab()
@@ -562,6 +566,7 @@ class ManagerApp(ctk.CTk):
         self._build_steps_tab()
         self._build_warn_tab()
         self._build_sketch_tab()
+        self._build_firmware_tab()
         self._build_schema_tab()
 
         # Footer tip
@@ -686,6 +691,92 @@ class ManagerApp(ctk.CTk):
             text_color="#d4d4d8",
         )
         self.txt_sketch.pack(fill="both", expand=True)
+
+    def _build_firmware_tab(self) -> None:
+        from bin_builder import CHIP_FAMILIES
+
+        f = ctk.CTkFrame(self.tab_firmware, fg_color="transparent")
+        f.pack(fill="both", expand=True, padx=12, pady=12)
+
+        ctk.CTkLabel(
+            f,
+            text="Firmware .bin pentru încărcare din site (Chrome/Edge + USB)",
+            text_color=COLORS["muted"],
+            font=ctk.CTkFont(size=13),
+        ).pack(anchor="w", pady=(0, 12))
+
+        ctk.CTkLabel(f, text="Familie chip (ESP Web Tools)", text_color=COLORS["muted"]).pack(
+            anchor="w"
+        )
+        self.cmb_chip = ctk.CTkComboBox(
+            f,
+            values=list(CHIP_FAMILIES),
+            height=36,
+            fg_color=COLORS["input"],
+            border_color=COLORS["border"],
+            button_color=COLORS["accent"],
+            dropdown_fg_color=COLORS["card"],
+            width=280,
+        )
+        self.cmb_chip.set("ESP8266")
+        self.cmb_chip.pack(anchor="w", pady=(4, 12))
+
+        ctk.CTkLabel(f, text="Cale firmware pe site", text_color=COLORS["muted"]).pack(anchor="w")
+        self.ent_firmware = ctk.CTkEntry(
+            f,
+            placeholder_text="firmware/001.bin (gol = fără buton pe site)",
+            height=36,
+            fg_color=COLORS["input"],
+            border_color=COLORS["border"],
+        )
+        self.ent_firmware.pack(fill="x", pady=(4, 12))
+
+        btn_row = ctk.CTkFrame(f, fg_color="transparent")
+        btn_row.pack(fill="x", pady=8)
+        ctk.CTkButton(
+            btn_row,
+            text="⚙ Generează BIN",
+            height=40,
+            fg_color=COLORS["green"],
+            hover_color="#16a34a",
+            text_color="#052e16",
+            font=ctk.CTkFont(weight="bold", size=14),
+            command=self._generate_bin,
+        ).pack(side="left", padx=(0, 8))
+        ctk.CTkButton(
+            btn_row,
+            text="Importă BIN…",
+            height=40,
+            width=130,
+            fg_color=COLORS["accent"],
+            command=self._import_bin,
+        ).pack(side="left", padx=4)
+        ctk.CTkButton(
+            btn_row,
+            text="Șterge BIN",
+            height=40,
+            width=100,
+            fg_color="#444",
+            command=self._clear_bin,
+        ).pack(side="left", padx=4)
+
+        self.firmware_log = ctk.CTkTextbox(
+            f,
+            height=220,
+            fg_color=COLORS["input"],
+            border_color=COLORS["border"],
+            border_width=1,
+            font=ctk.CTkFont(family="Consolas", size=12),
+        )
+        self.firmware_log.pack(fill="both", expand=True, pady=(12, 0))
+        self.firmware_log.insert(
+            "1.0",
+            "1. Alege chip-ul (ESP8266 / ESP32 / ESP32-C3…)\n"
+            "2. Apasă «Generează BIN» (compilează sketch-ul cu arduino-cli)\n"
+            "   sau «Importă BIN» din Arduino IDE (Sketch → Export compiled Binary)\n"
+            "3. Salvează proiectul + Auto GitHub / Push\n"
+            "4. Pe site: buton «Încarcă pe ESP» (Chrome/Edge + cablu USB)\n",
+        )
 
     def _build_schema_tab(self) -> None:
         f = ctk.CTkFrame(self.tab_schema, fg_color="transparent")
@@ -812,14 +903,21 @@ class ManagerApp(ctk.CTk):
             self.ent_tiktok,
             self.ent_sketch_name,
             self.ent_schema,
+            self.ent_firmware,
         ):
             ent.delete(0, "end")
         for t in (self.txt_steps, self.txt_warn, self.txt_sketch):
             t.delete("1.0", "end")
         self._set_wiring([["Componentă", "Pin ESP"], ["", ""]])
         self.schema_preview.configure(text="Nicio imagine selectată", image=None)
+        try:
+            self.cmb_chip.set("ESP8266")
+        except Exception:
+            pass
 
     def _fill_form(self, p: dict[str, Any]) -> None:
+        from bin_builder import infer_chip_family
+
         self._clear_form()
         self.ent_id.insert(0, str(p.get("id", "")))
         self.ent_title.insert(0, str(p.get("title", "")))
@@ -829,6 +927,15 @@ class ManagerApp(ctk.CTk):
         self.ent_tiktok.insert(0, str(p.get("tiktok", "")))
         self.ent_sketch_name.insert(0, str(p.get("sketchName", "")))
         self.ent_schema.insert(0, str(p.get("schemaImage", "") or ""))
+        self.ent_firmware.insert(0, str(p.get("firmwareBin", "") or ""))
+
+        chip = p.get("chipFamily") or infer_chip_family(
+            p.get("board", ""), p.get("tags"), p.get("title", "")
+        )
+        try:
+            self.cmb_chip.set(chip)
+        except Exception:
+            self.cmb_chip.set("ESP8266")
 
         steps = p.get("steps") or []
         self.txt_steps.insert("1.0", "\n".join(steps))
@@ -863,6 +970,8 @@ class ManagerApp(ctk.CTk):
                 messagebox.showerror("Eroare", f"Există deja proiectul #{pid}.")
                 return None
 
+        fw = self.ent_firmware.get().strip()
+        chip = self.cmb_chip.get().strip() or "ESP8266"
         return {
             "id": pid,
             "title": self.ent_title.get().strip() or "Fără titlu",
@@ -877,7 +986,90 @@ class ManagerApp(ctk.CTk):
             "warnings": warns,
             "sketch": self.txt_sketch.get("1.0", "end").rstrip("\n") + "\n",
             "schemaImage": self.ent_schema.get().strip(),
+            "chipFamily": chip,
+            "firmwareBin": fw,
+            "firmwareManifest": f"firmware/{pid}.manifest.json" if fw else "",
         }
+
+    def _fw_log(self, text: str) -> None:
+        self.firmware_log.delete("1.0", "end")
+        self.firmware_log.insert("1.0", text)
+        self.status_lbl.configure(text=text.splitlines()[0][:80] if text else "")
+
+    def _apply_project_update(self, project: dict[str, Any]) -> None:
+        """Scrie proiectul curent din dict, salvează json+js, reîmprospătează form."""
+        if self.current_index is None:
+            return
+        self.projects[self.current_index] = project
+        save_json(self.projects)
+        generate_js(self.projects)
+        self._dirty = False
+        self.ent_firmware.delete(0, "end")
+        self.ent_firmware.insert(0, project.get("firmwareBin") or "")
+        if project.get("chipFamily"):
+            self.cmb_chip.set(project["chipFamily"])
+        self._refresh_list()
+
+    def _generate_bin(self) -> None:
+        if self.current_index is None:
+            messagebox.showinfo("Info", "Selectează un proiect.")
+            return
+        data = self._collect_form()
+        if data is None:
+            return
+        self._fw_log("Compilare în curs… (prima dată descarcă core-uri ESP, poate dura)")
+        self.update_idletasks()
+
+        def work() -> None:
+            from bin_builder import compile_project
+
+            ok, msg, proj = compile_project(data, auto_download_cli=True)
+
+            def done() -> None:
+                self._fw_log(msg)
+                if ok:
+                    self._apply_project_update(proj)
+                    if self.auto_gh_var.get():
+                        self._sync_github(
+                            f"Firmware BIN proiect #{proj.get('id')}", silent=True
+                        )
+                    messagebox.showinfo("BIN generat", msg)
+                else:
+                    messagebox.showerror("Compilare eșuată", msg)
+
+            self.after(0, done)
+
+        threading.Thread(target=work, daemon=True).start()
+
+    def _import_bin(self) -> None:
+        if self.current_index is None:
+            messagebox.showinfo("Info", "Selectează un proiect.")
+            return
+        data = self._collect_form()
+        if data is None:
+            return
+        path = filedialog.askopenfilename(
+            title="Alege fișier .bin (Export compiled Binary din Arduino IDE)",
+            filetypes=[("Firmware BIN", "*.bin"), ("Toate", "*.*")],
+        )
+        if not path:
+            return
+        from bin_builder import import_bin_file
+
+        ok, msg, proj = import_bin_file(data, Path(path))
+        self._fw_log(msg)
+        if ok:
+            self._apply_project_update(proj)
+            if self.auto_gh_var.get():
+                self._sync_github(f"Import BIN proiect #{proj.get('id')}", silent=True)
+            messagebox.showinfo("BIN importat", msg)
+        else:
+            messagebox.showerror("Eroare", msg)
+
+    def _clear_bin(self) -> None:
+        self.ent_firmware.delete(0, "end")
+        self._fw_log("Cale firmware ștearsă din formular. Apasă Salvează ca să actualizezi site-ul.")
+        self._dirty = True
 
     # ── Wiring rows ─────────────────────────────────────────────────────────
 

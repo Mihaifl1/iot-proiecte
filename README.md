@@ -37,10 +37,21 @@ Pe PC poți **adăuga, edita și șterge** proiecte din lista de pe pagina princ
 | Pași numerotați | Tab **Pași** |
 | Avertismente | Tab **Avertismente** |
 | Cod Arduino / încarcă `.ino` | Tab **Sketch** |
+| **Generează BIN** / Importă BIN | Tab **Firmware** |
 | Poză schemă (se copiază în `images/`) | Tab **Schemă foto** |
 | **Salvează** | Scrie `data/projects.json` + `projects-data.js` |
 | **Generează site** | Regenerează `projects-data.js` din toate proiectele |
 | **Previzualizare** | Deschide `index.html` în browser |
+
+### Firmware pe ESP din browser
+
+1. Manager → tab **Firmware** → alege chip (ESP8266 / ESP32 / …)
+2. **Generează BIN** (compilează cu arduino-cli) sau **Importă BIN** din Arduino IDE  
+   (*Sketch → Export compiled Binary*)
+3. **Salvează** (+ Auto GitHub)
+4. Pe site, pagina proiectului → **Încarcă pe ESP** (Chrome/Edge + USB)
+
+Fișiere: `firmware/00X.bin`. Site-ul folosește ESP Web Tools (Web Serial).
 
 Datele de editare: **`data/projects.json`**.  
 Site-ul citește: **`projects-data.js`** (generat automat — nu-l edita manual).

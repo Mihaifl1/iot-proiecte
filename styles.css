@@ -432,6 +432,48 @@ pre {
   padding-top: 8px;
 }
 
+/* Flash pe ESP */
+.flash-panel .flash-note {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.flash-panel.flash-missing {
+  border-style: dashed;
+  opacity: 0.95;
+}
+.flash-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.flash-install-host {
+  margin: 8px 0;
+}
+.flash-btn,
+esp-web-install-button {
+  display: inline-block;
+}
+.flash-btn {
+  min-width: 160px;
+  padding: 12px 18px;
+  font-size: 1rem;
+  background: linear-gradient(145deg, #5eb8a8, #4a9e90) !important;
+  box-shadow: 0 4px 14px rgba(94, 184, 168, 0.28);
+}
+.flash-hint {
+  margin: 10px 0 0;
+  font-size: 0.84rem;
+  color: #6b7c8e;
+}
+/* stil intern esp-web-tools slot buttons if plain */
+esp-web-install-button button[slot="activate"],
+esp-web-install-button .flash-btn {
+  cursor: pointer;
+}
+
 /* soft reduce motion */
 @media (prefers-reduced-motion: reduce) {
   .card, .num-row button {
