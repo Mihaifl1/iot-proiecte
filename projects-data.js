@@ -160,29 +160,9 @@ window.PROJECTS = [
         "Pin ESP"
       ]
     ],
-    "steps": [
-      "Lucrez la https://github.com/Mihaifl1/iot-proiecte",
-      "Citește: https://github.com/Mihaifl1/iot-proiecte/blob/main/GROK-CONTEXT.md",
-      "și README.md din repo.",
-      "Site: https://mihaifl1.github.io/iot-proiecte/",
-      "Manager: python manager.py",
-      "Continuă de aici: [scrie ce vrei să faci]",
-      "Sau scurt:",
-      "@ https://github.com/Mihaifl1/iot-proiecte/blob/main/GROK-CONTEXT.md",
-      "clonează repo-ul și continuă proiectul IoT de acolo"
-    ],
-    "warnings": [
-      "Lucrez la https://github.com/Mihaifl1/iot-proiecte",
-      "Citește: https://github.com/Mihaifl1/iot-proiecte/blob/main/GROK-CONTEXT.md",
-      "și README.md din repo.",
-      "Site: https://mihaifl1.github.io/iot-proiecte/",
-      "Manager: python manager.py",
-      "Continuă de aici: [scrie ce vrei să faci]",
-      "Sau scurt:",
-      "@ https://github.com/Mihaifl1/iot-proiecte/blob/main/GROK-CONTEXT.md",
-      "clonează repo-ul și continuă proiectul IoT de acolo"
-    ],
-    "sketch": "// Sketch Arduino / ESP\nvoid setup() {}\nvoid loop() {}\n",
+    "steps": [],
+    "warnings": [],
+    "sketch": "Lucrez la https://github.com/Mihaifl1/iot-proiecte\nCitește: https://github.com/Mihaifl1/iot-proiecte/blob/main/GROK-CONTEXT.md\nși README.md din repo.\nSite: https://mihaifl1.github.io/iot-proiecte/\nManager: python manager.py\nContinuă de aici: [scrie ce vrei să faci]\n\nSau scurt:\n\n@ https://github.com/Mihaifl1/iot-proiecte/blob/main/GROK-CONTEXT.md\nclonează repo-ul și continuă proiectul IoT de acolo\n",
     "schemaImage": "",
     "chipFamily": "ESP8266",
     "firmwareBin": "",
