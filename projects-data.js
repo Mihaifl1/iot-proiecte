@@ -149,6 +149,502 @@ window.PROJECTS = [
     "firmwareBin": "firmware/003.bin",
     "firmwareManifest": "firmware/003.manifest.json",
     "published": true
+  },
+  {
+    "tiktok": "În video scrii: Proiect #004 · Link în bio",
+    "schemaImage": "",
+    "firmwareBin": "",
+    "firmwareManifest": "",
+    "published": true,
+    "id": "004",
+    "title": "ESP8266 Termometru DHT22",
+    "short": "Temperatură + umiditate pe telefon, fără router",
+    "board": "NodeMCU ESP8266",
+    "tags": [
+      "ESP8266",
+      "DHT22",
+      "AP"
+    ],
+    "sketchName": "ESP8266_DHT22_AP.ino",
+    "chipFamily": "ESP8266",
+    "usbChip": "CH340",
+    "wiring": [
+      [
+        "Componentă",
+        "Pin ESP"
+      ],
+      [
+        "DHT22 VCC",
+        "3V3"
+      ],
+      [
+        "DHT22 GND",
+        "GND"
+      ],
+      [
+        "DHT22 DATA",
+        "D4 (GPIO2)"
+      ],
+      [
+        "Pull-up 4.7k (dacă lipsește pe modul)",
+        "DATA ↔ 3V3"
+      ]
+    ],
+    "steps": [
+      "Arduino IDE → Board: NodeMCU 1.0 + librăria DHT sensor library (Adafruit).",
+      "Upload sketch → WiFi ESP-DHT / 12345678.",
+      "Browser → 192.168.4.1 — se reîmprospătează la 5 s."
+    ],
+    "warnings": [
+      "DHT22 e 3.3–5 V; pe NodeMCU folosește 3V3.",
+      "Nu lega 230V la pinii ESP."
+    ],
+    "sketch": "#include <ESP8266WiFi.h>\n#include <ESP8266WebServer.h>\n#include <DHT.h>\n\nconst char* ssid = \"ESP-DHT\";\nconst char* password = \"12345678\";\n#define DHTPIN D4\n#define DHTTYPE DHT22\nDHT dht(DHTPIN, DHTTYPE);\nESP8266WebServer server(80);\n\nvoid handleRoot() {\n  float t = dht.readTemperature();\n  float h = dht.readHumidity();\n  String html = \"<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'>\";\n  html += \"<meta http-equiv='refresh' content='5'><title>DHT22</title></head>\";\n  html += \"<body style='background:#111;color:#eee;font-family:sans-serif;text-align:center;padding:32px'>\";\n  html += \"<h1>ESP DHT22</h1>\";\n  if (isnan(t) || isnan(h)) html += \"<p>Senzor indisponibil</p>\";\n  else {\n    html += \"<p style='font-size:2rem'>\" + String(t, 1) + \" &deg;C</p>\";\n    html += \"<p>Umiditate: \" + String(h, 0) + \" %</p>\";\n  }\n  html += \"</body></html>\";\n  server.send(200, \"text/html\", html);\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  dht.begin();\n  WiFi.softAP(ssid, password);\n  Serial.println(WiFi.softAPIP());\n  server.on(\"/\", handleRoot);\n  server.begin();\n}\nvoid loop() { server.handleClient(); }\n"
+  },
+  {
+    "tiktok": "În video scrii: Proiect #005 · Link în bio",
+    "schemaImage": "",
+    "firmwareBin": "",
+    "firmwareManifest": "",
+    "published": true,
+    "id": "005",
+    "title": "ESP32-C3 Alarmă PIR",
+    "short": "Mișcare + buzzer, armare din telefon pe AP",
+    "board": "ESP32-C3 Super Mini",
+    "tags": [
+      "ESP32",
+      "PIR",
+      "Alarmă"
+    ],
+    "sketchName": "esp32c3_pir_alarm.ino",
+    "chipFamily": "ESP32-C3",
+    "usbChip": "CDC",
+    "wiring": [
+      [
+        "Componentă",
+        "ESP32-C3 Super Mini"
+      ],
+      [
+        "PIR VCC",
+        "5V sau 3V3 (după modul)"
+      ],
+      [
+        "PIR GND",
+        "GND"
+      ],
+      [
+        "PIR OUT",
+        "GPIO4"
+      ],
+      [
+        "Buzzer +",
+        "GPIO5"
+      ],
+      [
+        "Buzzer −",
+        "GND"
+      ]
+    ],
+    "steps": [
+      "Board: ESP32C3 Dev Module.",
+      "Upload → AP ESP-PIR / 12345678 → 192.168.4.1.",
+      "Armează / dezarmează din pagină. PIR-ul are ~30 s încălzire."
+    ],
+    "warnings": [
+      "Modulele PIR HC-SR501 preferă 5 V pe VCC.",
+      "Nu ține buzzerul pe un pin 3.3 V dacă e foarte consumator — folosește buzzer activ mic."
+    ],
+    "sketch": "#include <WiFi.h>\n#include <WebServer.h>\n\nconst char* ap_ssid = \"ESP-PIR\";\nconst char* ap_pass = \"12345678\";\n#define PIR_PIN 4\n#define BUZZ_PIN 5\nWebServer server(80);\nbool armed = true;\nbool motion = false;\n\nvoid handleRoot() {\n  String html = \"<!DOCTYPE html><html><meta name='viewport' content='width=device-width,initial-scale=1'>\";\n  html += \"<meta http-equiv='refresh' content='2'><body style='background:#111;color:#eee;text-align:center;font-family:sans-serif;padding:28px'>\";\n  html += \"<h1>Alarma PIR</h1><p>Miscare: <b>\";\n  html += motion ? \"DA\" : \"nu\";\n  html += \"</b></p><p>Armata: \";\n  html += armed ? \"DA\" : \"nu\";\n  html += \"</p><p><a href='/arm'>Armeaza</a> &nbsp; <a href='/disarm'>Dezarmeaza</a></p></body></html>\";\n  server.send(200, \"text/html\", html);\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(PIR_PIN, INPUT);\n  pinMode(BUZZ_PIN, OUTPUT);\n  digitalWrite(BUZZ_PIN, LOW);\n  WiFi.softAP(ap_ssid, ap_pass);\n  Serial.println(WiFi.softAPIP());\n  server.on(\"/\", handleRoot);\n  server.on(\"/arm\", []() { armed = true; server.sendHeader(\"Location\", \"/\"); server.send(303); });\n  server.on(\"/disarm\", []() { armed = false; digitalWrite(BUZZ_PIN, LOW); server.sendHeader(\"Location\", \"/\"); server.send(303); });\n  server.begin();\n}\nvoid loop() {\n  motion = digitalRead(PIR_PIN) == HIGH;\n  digitalWrite(BUZZ_PIN, (armed && motion) ? HIGH : LOW);\n  server.handleClient();\n}\n"
+  },
+  {
+    "tiktok": "În video scrii: Proiect #006 · Link în bio",
+    "schemaImage": "",
+    "firmwareBin": "",
+    "firmwareManifest": "",
+    "published": true,
+    "id": "006",
+    "title": "ESP8266 Irigator plante",
+    "short": "Senzor de sol + pompă/releu, control web",
+    "board": "NodeMCU ESP8266",
+    "tags": [
+      "ESP8266",
+      "Sol",
+      "Releu"
+    ],
+    "sketchName": "ESP8266_Plant.ino",
+    "chipFamily": "ESP8266",
+    "usbChip": "CH340",
+    "wiring": [
+      [
+        "Componentă",
+        "Pin ESP"
+      ],
+      [
+        "Senzor sol VCC",
+        "3V3"
+      ],
+      [
+        "Senzor sol GND",
+        "GND"
+      ],
+      [
+        "Senzor sol AO",
+        "A0"
+      ],
+      [
+        "Relay IN",
+        "D1 (GPIO5)"
+      ],
+      [
+        "Relay VCC / GND",
+        "5V / GND"
+      ]
+    ],
+    "steps": [
+      "Upload sketch → AP ESP-Plant / 12345678.",
+      "Browser 192.168.4.1 — vezi valoarea analogică și pornești pompa.",
+      "Calibrează: aer (uscat) vs. apă; apoi decizi pragul."
+    ],
+    "warnings": [
+      "Sarcina pe relee: COM/NO/NC, alimentare separată.",
+      "Pompa 12 V / 230 V doar pe contactele releului, nu pe ESP.",
+      "Nu lega 230V la pinii ESP."
+    ],
+    "sketch": "#include <ESP8266WiFi.h>\n#include <ESP8266WebServer.h>\n\nconst char* ssid = \"ESP-Plant\";\nconst char* password = \"12345678\";\n#define SOIL_PIN A0\n#define RELAY_PIN D1\nESP8266WebServer server(80);\nint threshold = 500;\nbool pump = false;\n\nvoid applyPump() { digitalWrite(RELAY_PIN, pump ? HIGH : LOW); }\n\nvoid handleRoot() {\n  int soil = analogRead(SOIL_PIN);\n  String html = \"<!DOCTYPE html><html><meta name='viewport' content='width=device-width,initial-scale=1'>\";\n  html += \"<meta http-equiv='refresh' content='4'><body style='background:#111;color:#eee;text-align:center;font-family:sans-serif;padding:28px'>\";\n  html += \"<h1>Ir<fim-middle>igator</h1><p>Sol (0 uscat - 1024 umed): <b>\" + String(soil) + \"</b></p>\";\n  html += \"<p>Pompa: \" + String(pump ? \"ON\" : \"OFF\") + \"</p>\";\n  html += \"<p><a href='/on'>ON</a> &nbsp; <a href='/off'>OFF</a></p></body></html>\";\n  server.send(200, \"text/html\", html);\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(RELAY_PIN, OUTPUT);\n  applyPump();\n  WiFi.softAP(ssid, password);\n  Serial.println(WiFi.softAPIP());\n  server.on(\"/\", handleRoot);\n  server.on(\"/on\", []() { pump = true; applyPump(); server.sendHeader(\"Location\", \"/\"); server.send(303); });\n  server.on(\"/off\", []() { pump = false; applyPump(); server.sendHeader(\"Location\", \"/\"); server.send(303); });\n  server.begin();\n}\nvoid loop() { server.handleClient(); }\n"
+  },
+  {
+    "tiktok": "În video scrii: Proiect #007 · Link în bio",
+    "schemaImage": "",
+    "firmwareBin": "",
+    "firmwareManifest": "",
+    "published": true,
+    "id": "007",
+    "title": "ESP32 Bandă LED WS2812",
+    "short": "Culoare RGB din browser, 8 LED-uri pe AP",
+    "board": "ESP32-C3 Super Mini",
+    "tags": [
+      "ESP32",
+      "WS2812",
+      "LED"
+    ],
+    "sketchName": "esp32_ws2812.ino",
+    "chipFamily": "ESP32-C3",
+    "usbChip": "CDC",
+    "wiring": [
+      [
+        "Componentă",
+        "ESP32-C3 Super Mini"
+      ],
+      [
+        "WS2812 5V",
+        "5V (sau 3V3 la 1–8 LED-uri)"
+      ],
+      [
+        "WS2812 GND",
+        "GND"
+      ],
+      [
+        "WS2812 DIN",
+        "GPIO4"
+      ]
+    ],
+    "steps": [
+      "Librărie Adafruit NeoPixel.",
+      "Upload → AP ESP-RGB / 12345678 → 192.168.4.1.",
+      "Glisează R/G/B și apasă Setează."
+    ],
+    "warnings": [
+      "GND comun ESP + bandă. La multe LED-uri alimentează banda separat de 5 V."
+    ],
+    "sketch": "#include <WiFi.h>\n#include <WebServer.h>\n#include <Adafruit_NeoPixel.h>\n\nconst char* ap_ssid = \"ESP-RGB\";\nconst char* ap_pass = \"12345678\";\n#define LED_PIN 4\n#define LED_COUNT 8\nAdafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);\nWebServer server(80);\nuint8_t cr = 0, cg = 40, cb = 80;\n\nvoid showColor() {\n  for (int i = 0; i < LED_COUNT; i++) strip.setPixelColor(i, strip.Color(cr, cg, cb));\n  strip.show();\n}\n\nvoid handleRoot() {\n  if (server.hasArg(\"r\")) cr = server.arg(\"r\").toInt();\n  if (server.hasArg(\"g\")) cg = server.arg(\"g\").toInt();\n  if (server.hasArg(\"b\")) cb = server.arg(\"b\").toInt();\n  showColor();\n  String html = \"<!DOCTYPE html><html><meta name='viewport' content='width=device-width,initial-scale=1'>\";\n  html += \"<body style='background:#111;color:#eee;text-align:center;font-family:sans-serif;padding:24px'>\";\n  html += \"<h1>WS2812</h1><form><p>R <input type='range' name='r' min='0' max='255' value='\" + String(cr) + \"'></p>\";\n  html += \"<p>G <input type='range' name='g' min='0' max='255' value='\" + String(cg) + \"'></p>\";\n  html += \"<p>B <input type='range' name='b' min='0' max='255' value='\" + String(cb) + \"'></p>\";\n  html += \"<button>Seteaza</button></form></body></html>\";\n  server.send(200, \"text/html\", html);\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  strip.begin();\n  showColor();\n  WiFi.softAP(ap_ssid, ap_pass);\n  Serial.println(WiFi.softAPIP());\n  server.on(\"/\", handleRoot);\n  server.begin();\n}\nvoid loop() { server.handleClient(); }\n"
+  },
+  {
+    "tiktok": "În video scrii: Proiect #008 · Link în bio",
+    "schemaImage": "",
+    "firmwareBin": "",
+    "firmwareManifest": "",
+    "published": true,
+    "id": "008",
+    "title": "ESP8266 Panou 4 relee",
+    "short": "Patru ieșiri ON/OFF de pe telefon, AP",
+    "board": "NodeMCU ESP8266",
+    "tags": [
+      "ESP8266",
+      "Releu",
+      "AP"
+    ],
+    "sketchName": "ESP8266_4Relay.ino",
+    "chipFamily": "ESP8266",
+    "usbChip": "CH340",
+    "wiring": [
+      [
+        "Componentă",
+        "Pin ESP"
+      ],
+      [
+        "Relay IN1 / IN2 / IN3 / IN4",
+        "D1 / D2 / D5 / D6"
+      ],
+      [
+        "Relay VCC",
+        "5V"
+      ],
+      [
+        "Relay GND",
+        "GND"
+      ]
+    ],
+    "steps": [
+      "Upload → AP ESP-4Relay / 12345678.",
+      "192.168.4.1 — ON/OFF pe fiecare canal.",
+      "Dacă logica e inversă, schimbă HIGH ↔ LOW în sketch."
+    ],
+    "warnings": [
+      "Sarcina pe relee: COM/NO/NC, alimentare separată.",
+      "Nu lega 230V la pinii ESP."
+    ],
+    "sketch": "#include <ESP8266WiFi.h>\n#include <ESP8266WebServer.h>\n\nconst char* ssid = \"ESP-4Relay\";\nconst char* password = \"12345678\";\nconst int pins[4] = {D1, D2, D5, D6};\nbool st[4] = {false, false, false, false};\nESP8266WebServer server(80);\n\nvoid apply() {\n  for (int i = 0; i < 4; i++) digitalWrite(pins[i], st[i] ? HIGH : LOW);\n}\n\nvoid handleRoot() {\n  String html = \"<!DOCTYPE html><html><meta name='viewport' content='width=device-width,initial-scale=1'>\";\n  html += \"<body style='background:#111;color:#eee;text-align:center;font-family:sans-serif;padding:24px'><h1>4 relee</h1>\";\n  for (int i = 0; i < 4; i++) {\n    html += \"<p>R\" + String(i + 1) + \": <b>\" + String(st[i] ? \"ON\" : \"OFF\") + \"</b> \";\n    html += \"<a href='/on?ch=\" + String(i) + \"'>ON</a> \";\n    html += \"<a href='/off?ch=\" + String(i) + \"'>OFF</a></p>\";\n  }\n  html += \"</body></html>\";\n  server.send(200, \"text/html\", html);\n}\n\nvoid setCh(bool on) {\n  int ch = server.hasArg(\"ch\") ? server.arg(\"ch\").toInt() : -1;\n  if (ch >= 0 && ch < 4) st[ch] = on;\n  apply();\n  server.sendHeader(\"Location\", \"/\");\n  server.send(303);\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  for (int i = 0; i < 4; i++) { pinMode(pins[i], OUTPUT); }\n  apply();\n  WiFi.softAP(ssid, password);\n  Serial.println(WiFi.softAPIP());\n  server.on(\"/\", handleRoot);\n  server.on(\"/on\", []() { setCh(true); });\n  server.on(\"/off\", []() { setCh(false); });\n  server.begin();\n}\nvoid loop() { server.handleClient(); }\n"
+  },
+  {
+    "tiktok": "În video scrii: Proiect #009 · Link în bio",
+    "schemaImage": "",
+    "firmwareBin": "",
+    "firmwareManifest": "",
+    "published": true,
+    "id": "009",
+    "title": "ESP32-C3 Servomotor web",
+    "short": "Unghi 0–180° din telefon, fără router",
+    "board": "ESP32-C3 Super Mini",
+    "tags": [
+      "ESP32",
+      "Servo"
+    ],
+    "sketchName": "esp32c3_servo.ino",
+    "chipFamily": "ESP32-C3",
+    "usbChip": "CDC",
+    "wiring": [
+      [
+        "Componentă",
+        "ESP32-C3 Super Mini"
+      ],
+      [
+        "Servo 5V (roșu)",
+        "5V (alimentare externă recomandată)"
+      ],
+      [
+        "Servo GND (maro/negru)",
+        "GND comun"
+      ],
+      [
+        "Servo PWM (portocaliu)",
+        "GPIO4"
+      ]
+    ],
+    "steps": [
+      "Librărie ESP32Servo.",
+      "Upload → AP ESP-Servo / 12345678 → 192.168.4.1.",
+      "Glisează unghiul sau apasă 0 / 90 / 180."
+    ],
+    "warnings": [
+      "Servo-ul trage curent la mișcare — GND comun, 5 V separat dacă tresare ESP-ul."
+    ],
+    "sketch": "#include <WiFi.h>\n#include <WebServer.h>\n#include <ESP32Servo.h>\n\nconst char* ap_ssid = \"ESP-Servo\";\nconst char* ap_pass = \"12345678\";\n#define SERVO_PIN 4\nServo s;\nWebServer server(80);\nint angle = 90;\n\nvoid handleRoot() {\n  if (server.hasArg(\"a\")) {\n    angle = constrain(server.arg(\"a\").toInt(), 0, 180);\n    s.write(angle);\n  }\n  String html = \"<!DOCTYPE html><html><meta name='viewport' content='width=device-width,initial-scale=1'>\";\n  html += \"<body style='background:#111;color:#eee;text-align:center;font-family:sans-serif;padding:24px'>\";\n  html += \"<h1>Servo</h1><p>Unghi: \" + String(angle) + \"&deg;</p>\";\n  html += \"<form><input type='range' name='a' min='0' max='180' value='\" + String(angle) + \"'>\";\n  html += \"<p><button>Seteaza</button></p></form>\";\n  html += \"<p><a href='/?a=0'>0</a> &nbsp; <a href='/?a=90'>90</a> &nbsp; <a href='/?a=180'>180</a></p></body></html>\";\n  server.send(200, \"text/html\", html);\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  s.setPeriodHertz(50);\n  s.attach(SERVO_PIN, 500, 2400);\n  s.write(angle);\n  WiFi.softAP(ap_ssid, ap_pass);\n  Serial.println(WiFi.softAPIP());\n  server.on(\"/\", handleRoot);\n  server.begin();\n}\nvoid loop() { server.handleClient(); }\n"
+  },
+  {
+    "tiktok": "În video scrii: Proiect #010 · Link în bio",
+    "schemaImage": "",
+    "firmwareBin": "",
+    "firmwareManifest": "",
+    "published": true,
+    "id": "010",
+    "title": "ESP8266 Alarmă scurgere apă",
+    "short": "Senzor de lichid + buzzer, stare pe web",
+    "board": "NodeMCU ESP8266",
+    "tags": [
+      "ESP8266",
+      "Apă",
+      "Alarmă"
+    ],
+    "sketchName": "ESP8266_Leak.ino",
+    "chipFamily": "ESP8266",
+    "usbChip": "CH340",
+    "wiring": [
+      [
+        "Componentă",
+        "Pin ESP"
+      ],
+      [
+        "Senzor scurgere VCC",
+        "3V3"
+      ],
+      [
+        "Senzor scurgere GND",
+        "GND"
+      ],
+      [
+        "Senzor DO (digital)",
+        "D5"
+      ],
+      [
+        "Buzzer +",
+        "D6"
+      ],
+      [
+        "Buzzer −",
+        "GND"
+      ]
+    ],
+    "steps": [
+      "Upload → AP ESP-Leak / 12345678.",
+      "192.168.4.1 se reîmprospătează singur.",
+      "Mute oprește sunetul; senzorul e activ LOW când e umed."
+    ],
+    "warnings": [
+      "Ține electronica departe de apă. Doar sonda/senzorul stă jos.",
+      "Nu lega 230V la pinii ESP."
+    ],
+    "sketch": "#include <ESP8266WiFi.h>\n#include <ESP8266WebServer.h>\n\nconst char* ssid = \"ESP-Leak\";\nconst char* password = \"12345678\";\n#define LEAK_PIN D5\n#define BUZZ_PIN D6\nESP8266WebServer server(80);\nbool mute = false;\n\nvoid handleRoot() {\n  bool wet = digitalRead(LEAK_PIN) == LOW;\n  String html = \"<!DOCTYPE html><html><meta name='viewport' content='width=device-width,initial-scale=1'>\";\n  html += \"<meta http-equiv='refresh' content='2'><body style='background:#111;color:#eee;text-align:center;font-family:sans-serif;padding:28px'>\";\n  html += \"<h1>Scurgere apa</h1><p style='font-size:1.4rem'>\";\n  html += wet ? \"<b style='color:#f66'>Umed / ALARMA</b>\" : \"Uscat\";\n  html += \"</p><p><a href='/mute'>Mute</a> &nbsp; <a href='/unmute'>Sunet</a></p></body></html>\";\n  server.send(200, \"text/html\", html);\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(LEAK_PIN, INPUT_PULLUP);\n  pinMode(BUZZ_PIN, OUTPUT);\n  digitalWrite(BUZZ_PIN, LOW);\n  WiFi.softAP(ssid, password);\n  Serial.println(WiFi.softAPIP());\n  server.on(\"/\", handleRoot);\n  server.on(\"/mute\", []() { mute = true; digitalWrite(BUZZ_PIN, LOW); server.sendHeader(\"Location\", \"/\"); server.send(303); });\n  server.on(\"/unmute\", []() { mute = false; server.sendHeader(\"Location\", \"/\"); server.send(303); });\n  server.begin();\n}\nvoid loop() {\n  bool wet = digitalRead(LEAK_PIN) == LOW;\n  digitalWrite(BUZZ_PIN, (!mute && wet) ? HIGH : LOW);\n  server.handleClient();\n}\n"
+  },
+  {
+    "tiktok": "În video scrii: Proiect #011 · Link în bio",
+    "schemaImage": "",
+    "firmwareBin": "",
+    "firmwareManifest": "",
+    "published": true,
+    "id": "011",
+    "title": "ESP32 Meteo OLED + DHT22",
+    "short": "Temperatură pe ecran 0.96\" și pe telefon",
+    "board": "ESP32-C3 Super Mini",
+    "tags": [
+      "ESP32",
+      "OLED",
+      "DHT22"
+    ],
+    "sketchName": "esp32_oled_dht.ino",
+    "chipFamily": "ESP32-C3",
+    "usbChip": "CDC",
+    "wiring": [
+      [
+        "Componentă",
+        "ESP32-C3 Super Mini"
+      ],
+      [
+        "OLED VCC / GND",
+        "3V3 / GND"
+      ],
+      [
+        "OLED SDA / SCL",
+        "GPIO8 / GPIO9"
+      ],
+      [
+        "DHT22 VCC / GND / DATA",
+        "3V3 / GND / GPIO4"
+      ]
+    ],
+    "steps": [
+      "Librării: DHT, Adafruit SSD1306, Adafruit GFX.",
+      "Upload → AP ESP-Meteo / 12345678.",
+      "OLED-ul arată valorile; pagina web la 192.168.4.1."
+    ],
+    "warnings": [
+      "Dacă ecranul e negru, adresa I2C poate fi 0x3D în loc de 0x3C."
+    ],
+    "sketch": "#include <WiFi.h>\n#include <WebServer.h>\n#include <Wire.h>\n#include <Adafruit_GFX.h>\n#include <Adafruit_SSD1306.h>\n#include <DHT.h>\n\nconst char* ap_ssid = \"ESP-Meteo\";\nconst char* ap_pass = \"12345678\";\n#define DHTPIN 4\n#define DHTTYPE DHT22\n#define SDA_PIN 8\n#define SCL_PIN 9\nDHT dht(DHTPIN, DHTTYPE);\nAdafruit_SSD1306 display(128, 64, &Wire, -1);\nWebServer server(80);\nfloat t = NAN, h = NAN;\n\nvoid draw() {\n  display.clearDisplay();\n  display.setTextColor(SSD1306_WHITE);\n  display.setTextSize(1);\n  display.setCursor(0, 0);\n  display.println(\"ESP32 Meteo\");\n  display.setTextSize(2);\n  display.setCursor(0, 20);\n  if (isnan(t)) display.println(\"-- C\");\n  else { display.print(t, 1); display.println(\" C\"); }\n  display.setTextSize(1);\n  display.setCursor(0, 50);\n  if (isnan(h)) display.println(\"H: -- %\");\n  else { display.print(\"H: \"); display.print(h, 0); display.println(\" %\"); }\n  display.display();\n}\n\nvoid handleRoot() {\n  String html = \"<!DOCTYPE html><html><meta name='viewport' content='width=device-width,initial-scale=1'>\";\n  html += \"<meta http-equiv='refresh' content='5'><body style='background:#111;color:#eee;text-align:center;font-family:sans-serif;padding:28px'>\";\n  html += \"<h1>Meteo OLED</h1><p>\" + (isnan(t) ? String(\"--\") : String(t, 1)) + \" C</p>\";\n  html += \"<p>Umiditate \" + (isnan(h) ? String(\"--\") : String(h, 0)) + \" %</p></body></html>\";\n  server.send(200, \"text/html\", html);\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  Wire.begin(SDA_PIN, SCL_PIN);\n  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);\n  dht.begin();\n  WiFi.softAP(ap_ssid, ap_pass);\n  Serial.println(WiFi.softAPIP());\n  server.on(\"/\", handleRoot);\n  server.begin();\n  draw();\n}\nvoid loop() {\n  static unsigned long last = 0;\n  if (millis() - last > 3000) {\n    last = millis();\n    t = dht.readTemperature();\n    h = dht.readHumidity();\n    draw();\n  }\n  server.handleClient();\n}\n"
+  },
+  {
+    "tiktok": "În video scrii: Proiect #012 · Link în bio",
+    "schemaImage": "",
+    "firmwareBin": "",
+    "firmwareManifest": "",
+    "published": true,
+    "id": "012",
+    "title": "ESP8266 Contact ușă (reed)",
+    "short": "Deschis / închis pe telefon, LED de stare",
+    "board": "NodeMCU ESP8266",
+    "tags": [
+      "ESP8266",
+      "Reed",
+      "Ușă"
+    ],
+    "sketchName": "ESP8266_Door.ino",
+    "chipFamily": "ESP8266",
+    "usbChip": "CH340",
+    "wiring": [
+      [
+        "Componentă",
+        "Pin ESP"
+      ],
+      [
+        "Reed — un capăt",
+        "D5"
+      ],
+      [
+        "Reed — celălalt capăt",
+        "GND"
+      ],
+      [
+        "LED (opțional) prin 220 Ω",
+        "D4 → LED → GND"
+      ]
+    ],
+    "steps": [
+      "Upload → AP ESP-Door / 12345678.",
+      "Magnet lipit de toc + reed pe ușă.",
+      "Browser 192.168.4.1 — DESCHIS când circuitul se rupe."
+    ],
+    "warnings": [
+      "Reed-ul e doar semnal. Nu trece 230 V prin el."
+    ],
+    "sketch": "#include <ESP8266WiFi.h>\n#include <ESP8266WebServer.h>\n\nconst char* ssid = \"ESP-Door\";\nconst char* password = \"12345678\";\n#define REED_PIN D5\n#define LED_PIN D4\nESP8266WebServer server(80);\n\nvoid handleRoot() {\n  bool openDoor = digitalRead(REED_PIN) == HIGH;\n  String html = \"<!DOCTYPE html><html><meta name='viewport' content='width=device-width,initial-scale=1'>\";\n  html += \"<meta http-equiv='refresh' content='2'><body style='background:#111;color:#eee;text-align:center;font-family:sans-serif;padding:28px'>\";\n  html += \"<h1>Usa / geam</h1><p style='font-size:1.6rem'>\";\n  html += openDoor ? \"<b style='color:#f66'>DESCHIS</b>\" : \"<b style='color:#6c6'>INCHIS</b>\";\n  html += \"</p></body></html>\";\n  server.send(200, \"text/html\", html);\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(REED_PIN, INPUT_PULLUP);\n  pinMode(LED_PIN, OUTPUT);\n  WiFi.softAP(ssid, password);\n  Serial.println(WiFi.softAPIP());\n  server.on(\"/\", handleRoot);\n  server.begin();\n}\nvoid loop() {\n  bool openDoor = digitalRead(REED_PIN) == HIGH;\n  digitalWrite(LED_PIN, openDoor ? LOW : HIGH);\n  server.handleClient();\n}\n"
+  },
+  {
+    "tiktok": "În video scrii: Proiect #013 · Link în bio",
+    "schemaImage": "",
+    "firmwareBin": "",
+    "firmwareManifest": "",
+    "published": true,
+    "id": "013",
+    "title": "ESP32-C3 Distanță HC-SR04",
+    "short": "Radar ultrasonic în centimetri, live pe web",
+    "board": "ESP32-C3 Super Mini",
+    "tags": [
+      "ESP32",
+      "HC-SR04"
+    ],
+    "sketchName": "esp32c3_hcsr04.ino",
+    "chipFamily": "ESP32-C3",
+    "usbChip": "CDC",
+    "wiring": [
+      [
+        "Componentă",
+        "ESP32-C3 Super Mini"
+      ],
+      [
+        "HC-SR04 VCC",
+        "5V"
+      ],
+      [
+        "HC-SR04 GND",
+        "GND"
+      ],
+      [
+        "TRIG",
+        "GPIO4"
+      ],
+      [
+        "ECHO",
+        "GPIO5 (divisor 5 V→3.3 V recomandat)"
+      ]
+    ],
+    "steps": [
+      "Upload → AP ESP-Radar / 12345678.",
+      "192.168.4.1 se actualizează la ~1 s.",
+      "Domeniu tipic 2–200 cm."
+    ],
+    "warnings": [
+      "ECHO e 5 V pe multe module — folosește divisor 2k2/3k3 către GPIO5."
+    ],
+    "sketch": "#include <WiFi.h>\n#include <WebServer.h>\n\nconst char* ap_ssid = \"ESP-Radar\";\nconst char* ap_pass = \"12345678\";\n#define TRIG 4\n#define ECHO 5\nWebServer server(80);\nfloat cm = -1;\n\nfloat measure() {\n  digitalWrite(TRIG, LOW);\n  delayMicroseconds(2);\n  digitalWrite(TRIG, HIGH);\n  delayMicroseconds(10);\n  digitalWrite(TRIG, LOW);\n  long us = pulseIn(ECHO, HIGH, 30000);\n  if (us == 0) return -1;\n  return us / 58.0;\n}\n\nvoid handleRoot() {\n  String html = \"<!DOCTYPE html><html><meta name='viewport' content='width=device-width,initial-scale=1'>\";\n  html += \"<meta http-equiv='refresh' content='1'><body style='background:#111;color:#eee;text-align:center;font-family:sans-serif;padding:28px'>\";\n  html += \"<h1>HC-SR04</h1><p style='font-size:2rem'>\";\n  html += (cm < 0) ? \"-- cm\" : (String(cm, 1) + \" cm\");\n  html += \"</p></body></html>\";\n  server.send(200, \"text/html\", html);\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  pinMode(TRIG, OUTPUT);\n  pinMode(ECHO, INPUT);\n  WiFi.softAP(ap_ssid, ap_pass);\n  Serial.println(WiFi.softAPIP());\n  server.on(\"/\", handleRoot);\n  server.begin();\n}\nvoid loop() {\n  cm = measure();\n  server.handleClient();\n  delay(80);\n}\n"
   }
 ];
 

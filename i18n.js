@@ -261,6 +261,252 @@ const PROJECT_I18N = {
       warnings: ["Не подключайте 230 В к выводам ESP."],
     },
   },
+  "004": {
+    en: {
+      title: "ESP8266 DHT22 thermometer",
+      short: "Temperature + humidity on your phone, no router",
+      steps: [
+        "Arduino IDE → Board: NodeMCU 1.0 + DHT sensor library (Adafruit).",
+        "Upload → Wi‑Fi ESP-DHT / 12345678.",
+        "Browser → 192.168.4.1 — refreshes every 5 s.",
+      ],
+      warnings: ["DHT22 is 3.3–5 V; on NodeMCU use 3V3.", "Do not connect 230 V to ESP pins."],
+    },
+    ru: {
+      title: "ESP8266 термометр DHT22",
+      short: "Температура и влажность на телефоне, без роутера",
+      steps: [
+        "Arduino IDE → плата NodeMCU 1.0 + библиотека DHT (Adafruit).",
+        "Загрузка → Wi‑Fi ESP-DHT / 12345678.",
+        "Браузер → 192.168.4.1 — обновление каждые 5 с.",
+      ],
+      warnings: ["DHT22: 3.3–5 В; на NodeMCU используйте 3V3.", "Не подключайте 230 В к выводам ESP."],
+    },
+  },
+  "005": {
+    en: {
+      title: "ESP32-C3 PIR alarm",
+      short: "Motion + buzzer, arm/disarm from the phone over AP",
+      steps: [
+        "Board: ESP32C3 Dev Module.",
+        "Upload → AP ESP-PIR / 12345678 → 192.168.4.1.",
+        "Arm / disarm on the page. PIR needs ~30 s to warm up.",
+      ],
+      warnings: [
+        "HC-SR501 PIR modules prefer 5 V on VCC.",
+        "Use a small active buzzer on a 3.3 V pin.",
+      ],
+    },
+    ru: {
+      title: "ESP32-C3 сигнализация PIR",
+      short: "Движение + пищалка, постановка с телефона через AP",
+      steps: [
+        "Плата: ESP32C3 Dev Module.",
+        "Загрузка → AP ESP-PIR / 12345678 → 192.168.4.1.",
+        "Постановка / снятие на странице. PIR греется ~30 с.",
+      ],
+      warnings: [
+        "Модули HC-SR501 лучше питать 5 В.",
+        "Берите маленький активный зуммер на пин 3.3 В.",
+      ],
+    },
+  },
+  "006": {
+    en: {
+      title: "ESP8266 plant waterer",
+      short: "Soil sensor + pump/relay, web control",
+      steps: [
+        "Upload → AP ESP-Plant / 12345678.",
+        "Browser 192.168.4.1 — analog value and pump ON/OFF.",
+        "Calibrate dry air vs water, then pick a threshold.",
+      ],
+      warnings: [
+        "Relay load on COM/NO/NC, separate supply.",
+        "12 V / 230 V pump only on relay contacts, not on the ESP.",
+        "Do not connect 230 V to ESP pins.",
+      ],
+    },
+    ru: {
+      title: "ESP8266 полив растений",
+      short: "Датчик почвы + насос/реле, управление с веба",
+      steps: [
+        "Загрузка → AP ESP-Plant / 12345678.",
+        "Браузер 192.168.4.1 — значение АЦП и насос.",
+        "Откалибруйте сухой воздух и воду, затем порог.",
+      ],
+      warnings: [
+        "Нагрузка реле на COM/NO/NC, отдельное питание.",
+        "Насос 12 В / 230 В только на контактах реле.",
+        "Не подключайте 230 В к выводам ESP.",
+      ],
+    },
+  },
+  "007": {
+    en: {
+      title: "ESP32 WS2812 LED strip",
+      short: "RGB color from the browser, 8 LEDs over AP",
+      steps: [
+        "Library: Adafruit NeoPixel.",
+        "Upload → AP ESP-RGB / 12345678 → 192.168.4.1.",
+        "Move R/G/B sliders and press Set.",
+      ],
+      warnings: ["Common GND. For many LEDs, power the strip from a separate 5 V supply."],
+    },
+    ru: {
+      title: "ESP32 лента WS2812",
+      short: "Цвет RGB из браузера, 8 светодиодов через AP",
+      steps: [
+        "Библиотека Adafruit NeoPixel.",
+        "Загрузка → AP ESP-RGB / 12345678 → 192.168.4.1.",
+        "Ползунки R/G/B и кнопка Set.",
+      ],
+      warnings: ["Общий GND. Много светодиодов — питание ленты отдельно 5 В."],
+    },
+  },
+  "008": {
+    en: {
+      title: "ESP8266 4-relay panel",
+      short: "Four ON/OFF outputs from the phone, AP",
+      steps: [
+        "Upload → AP ESP-4Relay / 12345678.",
+        "192.168.4.1 — ON/OFF per channel.",
+        "If logic is inverted, swap HIGH ↔ LOW in the sketch.",
+      ],
+      warnings: [
+        "Relay load on COM/NO/NC, separate supply.",
+        "Do not connect 230 V to ESP pins.",
+      ],
+    },
+    ru: {
+      title: "ESP8266 панель 4 реле",
+      short: "Четыре выхода ON/OFF с телефона, AP",
+      steps: [
+        "Загрузка → AP ESP-4Relay / 12345678.",
+        "192.168.4.1 — ON/OFF по каналам.",
+        "Если логика инверсная, поменяйте HIGH ↔ LOW.",
+      ],
+      warnings: [
+        "Нагрузка реле на COM/NO/NC, отдельное питание.",
+        "Не подключайте 230 В к выводам ESP.",
+      ],
+    },
+  },
+  "009": {
+    en: {
+      title: "ESP32-C3 web servo",
+      short: "0–180° from the phone, no router",
+      steps: [
+        "Library: ESP32Servo.",
+        "Upload → AP ESP-Servo / 12345678 → 192.168.4.1.",
+        "Slide the angle or tap 0 / 90 / 180.",
+      ],
+      warnings: ["Servos surge current — common GND, separate 5 V if the ESP browns out."],
+    },
+    ru: {
+      title: "ESP32-C3 сервопривод с веба",
+      short: "Угол 0–180° с телефона, без роутера",
+      steps: [
+        "Библиотека ESP32Servo.",
+        "Загрузка → AP ESP-Servo / 12345678 → 192.168.4.1.",
+        "Ползунок или кнопки 0 / 90 / 180.",
+      ],
+      warnings: ["Серво даёт бросок тока — общий GND, 5 В отдельно если ESP перезапускается."],
+    },
+  },
+  "010": {
+    en: {
+      title: "ESP8266 water-leak alarm",
+      short: "Liquid sensor + buzzer, status on the web",
+      steps: [
+        "Upload → AP ESP-Leak / 12345678.",
+        "192.168.4.1 refreshes by itself.",
+        "Mute silences the buzzer; sensor is active LOW when wet.",
+      ],
+      warnings: [
+        "Keep electronics away from water. Only the probe goes low.",
+        "Do not connect 230 V to ESP pins.",
+      ],
+    },
+    ru: {
+      title: "ESP8266 протечка воды",
+      short: "Датчик жидкости + пищалка, статус на вебе",
+      steps: [
+        "Загрузка → AP ESP-Leak / 12345678.",
+        "192.168.4.1 обновляется сам.",
+        "Mute глушит звук; датчик активен LOW когда мокрый.",
+      ],
+      warnings: [
+        "Электронику держите сухой. Внизу только щуп.",
+        "Не подключайте 230 В к выводам ESP.",
+      ],
+    },
+  },
+  "011": {
+    en: {
+      title: "ESP32 OLED weather + DHT22",
+      short: "Temperature on a 0.96\" screen and on the phone",
+      steps: [
+        "Libraries: DHT, Adafruit SSD1306, Adafruit GFX.",
+        "Upload → AP ESP-Meteo / 12345678.",
+        "OLED shows values; web page at 192.168.4.1.",
+      ],
+      warnings: ["If the screen is black, I2C address may be 0x3D instead of 0x3C."],
+    },
+    ru: {
+      title: "ESP32 погода OLED + DHT22",
+      short: "Температура на экране 0.96\" и на телефоне",
+      steps: [
+        "Библиотеки: DHT, Adafruit SSD1306, Adafruit GFX.",
+        "Загрузка → AP ESP-Meteo / 12345678.",
+        "OLED показывает значения; веб 192.168.4.1.",
+      ],
+      warnings: ["Если экран чёрный, адрес I2C может быть 0x3D вместо 0x3C."],
+    },
+  },
+  "012": {
+    en: {
+      title: "ESP8266 door reed switch",
+      short: "Open / closed on the phone, status LED",
+      steps: [
+        "Upload → AP ESP-Door / 12345678.",
+        "Magnet on the frame + reed on the door.",
+        "Browser 192.168.4.1 — OPEN when the circuit breaks.",
+      ],
+      warnings: ["The reed is signal only. Do not put 230 V through it."],
+    },
+    ru: {
+      title: "ESP8266 геркон двери",
+      short: "Открыто / закрыто на телефоне, светодиод статуса",
+      steps: [
+        "Загрузка → AP ESP-Door / 12345678.",
+        "Магнит на коробке + геркон на двери.",
+        "Браузер 192.168.4.1 — ОТКРЫТО когда цепь рвётся.",
+      ],
+      warnings: ["Геркон только для сигнала. Не пускайте через него 230 В."],
+    },
+  },
+  "013": {
+    en: {
+      title: "ESP32-C3 HC-SR04 distance",
+      short: "Ultrasonic range in centimetres, live on the web",
+      steps: [
+        "Upload → AP ESP-Radar / 12345678.",
+        "192.168.4.1 updates about once a second.",
+        "Typical range 2–200 cm.",
+      ],
+      warnings: ["ECHO is 5 V on many modules — use a 2k2/3k3 divider to GPIO5."],
+    },
+    ru: {
+      title: "ESP32-C3 расстояние HC-SR04",
+      short: "Ультразвук в сантиметрах, live на вебе",
+      steps: [
+        "Загрузка → AP ESP-Radar / 12345678.",
+        "192.168.4.1 обновляется примерно раз в секунду.",
+        "Типичный диапазон 2–200 см.",
+      ],
+      warnings: ["ECHO часто 5 В — делитель 2к2/3к3 на GPIO5."],
+    },
+  },
 };
 
 const LANGS = ["ro", "ru", "en"];

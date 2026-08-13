@@ -173,6 +173,16 @@ def ensure_libs(cli: Path, sketch: str) -> tuple[bool, str]:
         needed.append("PubSubClient")
     if "ArduinoJson.h" in sketch:
         needed.append("ArduinoJson")
+    if "DHT.h" in sketch:
+        needed.append("DHT sensor library")
+        needed.append("Adafruit Unified Sensor")
+    if "Adafruit_NeoPixel.h" in sketch:
+        needed.append("Adafruit NeoPixel")
+    if "Adafruit_SSD1306.h" in sketch:
+        needed.append("Adafruit SSD1306")
+        needed.append("Adafruit GFX Library")
+    if "ESP32Servo.h" in sketch:
+        needed.append("ESP32Servo")
     msgs = []
     for lib in needed:
         code, out, err = _run_cli(cli, "lib", "install", lib, timeout=180)

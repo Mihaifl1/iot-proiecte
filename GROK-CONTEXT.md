@@ -35,7 +35,7 @@ Site static (GitHub Pages) + Manager Python (GUI CustomTkinter):
 - **#001** ESP8266 Relay AP — `firmware/001.bin`, flash pe site OK
 - **#002** ESP32-C3 temp + 2 relee — schemă OK, **fără BIN** încă (Manager → Firmware → Generează BIN)
 - **#003** ESP8266 scheduler — `firmware/003.bin`; zilele din UI aliniate cu `tm_wday` (Du=bit0). BIN vechi încă are mapping-ul greșit până la regenerare.
-- **#004** **draft** (nu e pe site) — slot gol, de completat când știi ce proiect e
+- **#004–#013** proiecte noi publice (DHT22, PIR, irigator, WS2812, 4 relee, servo, scurgere, OLED, reed, HC-SR04) — fără BIN încă
 
 ## Design / UX decis
 
