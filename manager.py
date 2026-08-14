@@ -224,10 +224,10 @@ def save_shop(items: list[dict[str, Any]]) -> None:
 
 def load_shop_settings() -> dict[str, Any]:
     if not SHOP_SETTINGS_PATH.exists():
-        return {"notifyPhone": ""}
+        return {"notifyPhone": "", "waApiKey": ""}
     with open(SHOP_SETTINGS_PATH, "r", encoding="utf-8") as f:
         data = json.load(f)
-    return data if isinstance(data, dict) else {"notifyPhone": ""}
+    return data if isinstance(data, dict) else {"notifyPhone": "", "waApiKey": ""}
 
 
 def save_shop_settings(settings: dict[str, Any]) -> None:
@@ -242,7 +242,8 @@ def generate_shop_js(items: list[dict[str, Any]], settings: dict[str, Any] | Non
     body = json.dumps(public, ensure_ascii=False, indent=2)
     cfg = settings if settings is not None else load_shop_settings()
     phone = str(cfg.get("notifyPhone") or "").strip()
-    settings_js = json.dumps({"notifyPhone": phone}, ensure_ascii=False)
+    key = str(cfg.get("waApiKey") or "").strip()
+    settings_js = json.dumps({"notifyPhone": phone, "waApiKey": key}, ensure_ascii=False)
     js = (
         "/* Generat automat din data/shop.json — nu edita manual */\n"
         f"window.SHOP_PRODUCTS = {body};\n"
@@ -1112,20 +1113,40 @@ class ManagerApp(ctk.CTk):
         phone_row.pack(fill="x", pady=(0, 8))
         ctk.CTkLabel(
             phone_row,
-            text="WhatsApp comenzi (ex: 3736xxxxxxx) — clientul îți trimite comanda pe WhatsApp:",
+            text="Agent WhatsApp (invizibil pentru client). Telefon cu prefix țară, fără +  ·  ApiKey CallMeBot:",
             text_color=COLORS["muted"],
         ).pack(anchor="w")
+        keys = ctk.CTkFrame(phone_row, fg_color="transparent")
+        keys.pack(fill="x", pady=(4, 0))
         self.ent_shop_phone = ctk.CTkEntry(
-            phone_row,
+            keys,
             height=34,
+            width=220,
             fg_color=COLORS["input"],
             border_color=COLORS["border"],
             placeholder_text="3736xxxxxxx",
         )
-        self.ent_shop_phone.pack(fill="x", pady=(4, 0))
-        saved_phone = str(load_shop_settings().get("notifyPhone") or "")
-        if saved_phone:
-            self.ent_shop_phone.insert(0, saved_phone)
+        self.ent_shop_phone.pack(side="left", padx=(0, 8))
+        self.ent_shop_key = ctk.CTkEntry(
+            keys,
+            height=34,
+            fg_color=COLORS["input"],
+            border_color=COLORS["border"],
+            placeholder_text="ApiKey CallMeBot",
+        )
+        self.ent_shop_key.pack(side="left", fill="x", expand=True)
+        saved = load_shop_settings()
+        if saved.get("notifyPhone"):
+            self.ent_shop_phone.insert(0, str(saved.get("notifyPhone")))
+        if saved.get("waApiKey"):
+            self.ent_shop_key.insert(0, str(saved.get("waApiKey")))
+        ctk.CTkLabel(
+            phone_row,
+            text="Activare o dată: pe WhatsApp trimite „I allow callmebot to send me messages” la +34 644 51 95 23. Botul îți dă ApiKey. Apoi Salvează aici.",
+            text_color="#71717a",
+            wraplength=720,
+            justify="left",
+        ).pack(anchor="w", pady=(6, 0))
         self.shop_scroll = ctk.CTkScrollableFrame(wrap, fg_color="transparent")
         self.shop_scroll.pack(fill="both", expand=True)
         self._fill_shop_tab()
@@ -1453,9 +1474,12 @@ class ManagerApp(ctk.CTk):
             phone = ""
             try:
                 phone = self.ent_shop_phone.get().strip()
+                key = self.ent_shop_key.get().strip()
             except Exception:
-                phone = load_shop_settings().get("notifyPhone") or ""
-            settings = {"notifyPhone": phone}
+                old = load_shop_settings()
+                phone = old.get("notifyPhone") or ""
+                key = old.get("waApiKey") or ""
+            settings = {"notifyPhone": phone, "waApiKey": key}
             save_shop_settings(settings)
             generate_shop_js(self.shop, settings)
             return True

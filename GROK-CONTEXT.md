@@ -35,8 +35,10 @@ Site static (GitHub Pages) + Manager Python (GUI CustomTkinter):
 | `shop/` | Magazin: **https://esp-proiecte.md/shop/** |
 
 **Magazin:** https://esp-proiecte.md/shop/  
-**Comenzi:** https://esp-proiecte.md/shop/#/comenzi — parolă `admin123` (comenzile de pe **acest** telefon/PC).  
-Ca să-ți vină comenzile de la clienți: Manager → Magazin → câmp **WhatsApp comenzi** (`3736xxxxxxx`) → Salvează. La „Trimite comanda” se deschide WhatsApp către tine.
+**Comenzi:** https://esp-proiecte.md/shop/#/comenzi — parolă `admin123` (doar pe aparatul unde s-a dat comanda).  
+**WhatsApp invizibil (agent):** Manager → Magazin → telefon `373…` + **ApiKey CallMeBot**.  
+Activare: pe WhatsApp, mesaj `I allow callmebot to send me messages` către **+34 644 51 95 23** → primești ApiKey → Salvează.  
+Clientul **nu** vede WhatsApp și **nu** vede numărul tău; mesajul îți vine ție de la CallMeBot.
 
 Descărcare Manager pe site: [https://esp-proiecte.md/#/admin](https://esp-proiecte.md/#/admin) — parolă `admin123`.  
 Regenerează arhiva după modificări: `python _pack_manager.py`

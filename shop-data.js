@@ -332,4 +332,4 @@ window.SHOP_PRODUCTS = [
     "published": true
   }
 ];
-window.SHOP_SETTINGS = {"notifyPhone": "37378858777"};
+window.SHOP_SETTINGS = {"notifyPhone": "37378858777", "waApiKey": ""};

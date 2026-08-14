@@ -327,6 +327,36 @@ function renderAll() {
   renderCart();
 }
 
+function notifyOwnerSilent(order) {
+  const cfg = window.SHOP_SETTINGS || {};
+  const phone = String(cfg.notifyPhone || "").replace(/\D/g, "");
+  const key = String(cfg.waApiKey || "").trim();
+  if (!phone || !key) return;
+  const text = [
+    "Comanda noua magazin ESP",
+    (order.name || "") + " / " + (order.phone || "") + " / " + (order.city || ""),
+    formatOrderItems(order),
+    "Total: " + money(order.total, "MDL"),
+    order.note || "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+  const url =
+    "https://api.callmebot.com/whatsapp.php?phone=" +
+    encodeURIComponent(phone) +
+    "&text=" +
+    encodeURIComponent(text) +
+    "&apikey=" +
+    encodeURIComponent(key);
+  try {
+    fetch(url, { mode: "no-cors", keepalive: true }).catch(() => {});
+  } catch (e) {}
+  try {
+    const img = new Image();
+    img.src = url;
+  } catch (e) {}
+}
+
 function shopSetLang(lang) {
   if (typeof setLang === "function") setLang(lang);
   else renderAll();
@@ -374,18 +404,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ok.hidden = false;
     ok.textContent = t("shopOrderOk");
     e.target.reset();
-    const phone = String((window.SHOP_SETTINGS || {}).notifyPhone || "").replace(/\D/g, "");
-    if (phone) {
-      const lines = [
-        "Comanda magazin ESP",
-        order.name + " / " + order.phone + " / " + order.city,
-        formatOrderItems(order),
-        "Total: " + money(order.total, "MDL"),
-        order.note || "",
-      ];
-      const url = "https://wa.me/" + phone + "?text=" + encodeURIComponent(lines.join("\n"));
-      window.open(url, "_blank");
-    }
+    notifyOwnerSilent(order);
   });
 
   const btnOk = $("#btn-orders-ok");
