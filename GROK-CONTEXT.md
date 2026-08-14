@@ -29,6 +29,10 @@ Site static (GitHub Pages) + Manager Python (GUI CustomTkinter):
 | `images/` | Scheme foto |
 | `fritzing/` | Scheme `.fzz` (Fritzing) — buton **Deschide Fritzing** în tab Cablare |
 | `.github/workflows/pages.yml` | Deploy GitHub Pages |
+| `downloads/iot-manager.zip` | Manager Python, parolă **admin123** (site `#/admin` + arhiva) |
+
+Descărcare Manager pe site: [https://esp-proiecte.md/#/admin](https://esp-proiecte.md/#/admin) — parolă `admin123`.  
+Regenerează arhiva după modificări: `python _pack_manager.py`
 
 ## Proiecte (stare)
 

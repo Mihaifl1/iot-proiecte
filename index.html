@@ -42,11 +42,39 @@
       <div class="section-title" data-i18n="allProjects">Toate proiectele</div>
       <div class="list" id="project-list"></div>
 
-      <p class="foot" data-i18n="foot">Schemă + sketch public · ESP8266 / ESP32 · reprodus ușor acasă</p>
+      <p class="foot">
+        <span data-i18n="foot">Schemă + sketch public · ESP8266 / ESP32 · reprodus ușor acasă</span>
+        <span class="foot-sep"> · </span>
+        <a href="#/admin" data-i18n="adminLink">Manager</a>
+      </p>
     </div>
 
     <!-- PROJECT (filled by JS) -->
     <div id="view-project" class="view"></div>
+
+    <!-- ADMIN: descărcare Manager Python -->
+    <div id="view-admin" class="view">
+      <section class="hero">
+        <h1 data-i18n="adminTitle">Manager Python</h1>
+        <p data-i18n="adminLead">Descarcă programul cu care editezi site-ul. Introdu parola.</p>
+      </section>
+      <div class="num-box admin-box">
+        <label for="admin-pass" data-i18n="adminPassLabel">Parolă</label>
+        <div class="num-row">
+          <input
+            id="admin-pass"
+            type="password"
+            autocomplete="current-password"
+            data-i18n-aria="adminPassLabel"
+            aria-label="Parolă"
+          />
+          <button type="button" id="btn-admin-dl" data-i18n="adminDownload">Descarcă</button>
+        </div>
+        <p class="num-error" id="admin-error"></p>
+        <p class="num-hint" id="admin-ok" hidden></p>
+      </div>
+      <p class="foot"><a href="#/" data-i18n="adminBack">← Înapoi la proiecte</a></p>
+    </div>
   </div>
 
   <script src="projects-data.js"></script>

@@ -1,0 +1,22 @@
+Manager Proiecte IoT
+====================
+
+Ce e în arhivă
+- manager.py              interfața grafică
+- bin_builder.py          compilare / import BIN
+- _compile_all.py         compilează toate BIN-urile
+- porneste-manager.bat    dublu-click pe Windows
+- setup-github-login.bat  login GitHub (o dată)
+- requirements.txt        dependențe Python
+
+Instalare pe un PC
+1. Dacă nu ai repo-ul:
+     git clone https://github.com/Mihaifl1/iot-proiecte.git
+2. Extrage ACEASTĂ arhivă peste folderul iot-proiecte
+   (parola arhivei = aceeași ca pe site).
+3. Dublu-click pe porneste-manager.bat
+   (instalează singur customtkinter + pillow dacă lipsesc).
+4. În Manager: Auto GitHub ON → Salvează face push pe site.
+
+Site: https://esp-proiecte.md/
+Repo: https://github.com/Mihaifl1/iot-proiecte

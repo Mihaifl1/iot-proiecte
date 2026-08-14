@@ -6,3 +6,4 @@ data/manager-settings.json
 tools/
 build_tmp/
 *.zip
+!downloads/*.zip

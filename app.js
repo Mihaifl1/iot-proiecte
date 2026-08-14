@@ -32,6 +32,83 @@ function goProject(id) {
   location.hash = "#/" + id;
 }
 
+function isAdminRoute() {
+  const h = location.hash.replace(/^#\/?/, "").toLowerCase();
+  return h === "admin" || h === "manager";
+}
+
+function showView(name) {
+  ["view-hub", "view-project", "view-admin"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle("active", id === name);
+  });
+}
+
+const MANAGER_PW_SHA256 =
+  "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9";
+
+async function sha256hex(text) {
+  const buf = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(text)
+  );
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+function renderAdmin() {
+  renderHeader(true);
+  showView("view-admin");
+  if (typeof applyStaticI18n === "function") applyStaticI18n();
+  const err = $("#admin-error");
+  const ok = $("#admin-ok");
+  if (err) err.classList.remove("show");
+  if (ok) {
+    ok.hidden = true;
+    ok.textContent = "";
+  }
+}
+
+function setupAdminDownload() {
+  const btn = $("#btn-admin-dl");
+  const input = $("#admin-pass");
+  if (!btn || !input) return;
+
+  const go = async () => {
+    const err = $("#admin-error");
+    const ok = $("#admin-ok");
+    const hex = await sha256hex(input.value || "");
+    if (hex !== MANAGER_PW_SHA256) {
+      if (err) {
+        err.textContent = t("adminBadPw");
+        err.classList.add("show");
+      }
+      if (ok) {
+        ok.hidden = true;
+        ok.textContent = "";
+      }
+      return;
+    }
+    if (err) err.classList.remove("show");
+    const a = document.createElement("a");
+    a.href = "downloads/iot-manager.zip";
+    a.download = "iot-manager.zip";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    if (ok) {
+      ok.textContent = t("adminDlOk");
+      ok.hidden = false;
+    }
+  };
+
+  btn.addEventListener("click", go);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") go();
+  });
+}
+
 function renderHeader(showBack) {
   const el = $("#site-header");
   if (!el) return;
@@ -54,8 +131,7 @@ function renderHeader(showBack) {
 
 function renderHub() {
   renderHeader(false);
-  $("#view-hub").classList.add("active");
-  $("#view-project").classList.remove("active");
+  showView("view-hub");
 
   if (typeof applyStaticI18n === "function") applyStaticI18n();
   const list = $("#project-list");
@@ -87,8 +163,7 @@ function renderHub() {
 function renderProject(raw) {
   const p = typeof localizedProject === "function" ? localizedProject(raw) : raw;
   renderHeader(true);
-  $("#view-hub").classList.remove("active");
-  $("#view-project").classList.add("active");
+  showView("view-project");
 
   const rows = p.wiring
     .slice(1)
@@ -181,6 +256,11 @@ function openFromInput() {
 }
 
 function route() {
+  if (isAdminRoute()) {
+    renderAdmin();
+    window.scrollTo(0, 0);
+    return;
+  }
   const id = getRouteId();
   if (!id) {
     renderHub();
@@ -208,5 +288,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.key === "Enter") openFromInput();
   });
   window.addEventListener("hashchange", route);
+  setupAdminDownload();
   route();
 });
