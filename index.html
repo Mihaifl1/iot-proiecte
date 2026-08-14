@@ -7,9 +7,24 @@
   <meta name="description" content="Proiecte IoT de reprodus: schemă de cablare și sketch Arduino/ESP gata de upload. Introdu numărul proiectului din video." />
   <meta property="og:title" content="Proiecte IoT – #001 #002 #003…" />
   <meta property="og:description" content="Schemă + sketch ESP ca să reproduci proiectele din video" />
-  <link rel="stylesheet" href="styles.css?v=3" />
+  <link rel="stylesheet" href="styles.css?v=4" />
+  <script>
+    try {
+      if (localStorage.getItem("iot-theme") === "fun") {
+        document.documentElement.classList.add("theme-fun");
+      }
+    } catch (e) {}
+  </script>
 </head>
 <body>
+  <div id="theme-decor" class="theme-decor" aria-hidden="true">
+    <img class="deco d1" src="images/theme/esp8266.jpg" alt="" />
+    <img class="deco d2" src="images/theme/arduino.jpg" alt="" />
+    <img class="deco d3" src="images/theme/dht22.jpg" alt="" />
+    <img class="deco d4" src="images/theme/esp32.jpg" alt="" />
+    <img class="deco d5" src="images/theme/relay.jpg" alt="" />
+    <img class="deco d6" src="images/theme/hcsr04.jpg" alt="" />
+  </div>
   <div class="wrap">
     <header id="site-header"></header>
 

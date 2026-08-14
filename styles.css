@@ -115,6 +115,69 @@ a:hover { text-decoration: underline; }
   border-color: rgba(91, 159, 212, 0.4);
 }
 
+/* Întrerupător temă */
+.theme-switch {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.theme-switch-track {
+  display: block;
+  width: 42px;
+  height: 24px;
+  border-radius: 999px;
+  background: #2a3544;
+  border: 1px solid var(--border);
+  position: relative;
+  transition: background 0.2s, border-color 0.2s;
+}
+.theme-switch-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #d4a574;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s, background 0.2s;
+}
+.theme-switch[aria-pressed="true"] .theme-switch-track {
+  background: #f2b84b;
+  border-color: #e09a2b;
+}
+.theme-switch[aria-pressed="true"] .theme-switch-knob {
+  transform: translateX(18px);
+  background: #fff8e7;
+}
+
+/* Foto decorative — doar tema veselă */
+.theme-decor {
+  display: none;
+  pointer-events: none;
+}
+html.theme-fun .theme-decor { display: block; }
+.theme-decor .deco {
+  position: fixed;
+  width: 118px;
+  height: 118px;
+  object-fit: cover;
+  border-radius: 22px;
+  box-shadow: 0 10px 24px rgba(80, 40, 10, 0.18);
+  border: 3px solid rgba(255, 255, 255, 0.85);
+  z-index: 0;
+  opacity: 0.92;
+}
+.deco.d1 { top: 86px; left: 18px; transform: rotate(-11deg); }
+.deco.d2 { top: 38%; left: 10px; transform: rotate(8deg); }
+.deco.d3 { bottom: 48px; left: 28px; transform: rotate(-6deg); }
+.deco.d4 { top: 92px; right: 16px; transform: rotate(10deg); }
+.deco.d5 { top: 42%; right: 12px; transform: rotate(-9deg); }
+.deco.d6 { bottom: 40px; right: 22px; transform: rotate(7deg); }
+.wrap { z-index: 1; }
+
 /* ── Hub hero ── */
 .hero {
   text-align: center;
@@ -632,6 +695,91 @@ esp-web-install-button button[slot="activate"] {
   cursor: pointer;
 }
 
+/* Temă veselă — paletă caldă + foto în jur */
+html.theme-fun {
+  --bg: #fff4e4;
+  --bg-soft: #ffe7c8;
+  --card: #fffaf2;
+  --card-hover: #fff1dc;
+  --border: #f0c99a;
+  --border-soft: #f6d7b0;
+  --text: #2d2118;
+  --muted: #7a6454;
+  --accent: #e07a3d;
+  --accent-soft: rgba(224, 122, 61, 0.16);
+  --accent-strong: #d06528;
+  --teal: #2bb3a0;
+  --sage: #7cbc6a;
+  --amber: #f0a12e;
+  --pink: #e85d8a;
+  --green: #3caf6e;
+  --shadow: 0 8px 24px rgba(160, 90, 20, 0.12);
+}
+html.theme-fun body {
+  background-image:
+    radial-gradient(ellipse 70% 45% at 8% 0%, rgba(255, 186, 80, 0.35), transparent 55%),
+    radial-gradient(ellipse 55% 40% at 96% 8%, rgba(255, 140, 160, 0.22), transparent 50%),
+    radial-gradient(ellipse 50% 35% at 50% 100%, rgba(120, 210, 180, 0.22), transparent 55%);
+  background-attachment: scroll;
+}
+html.theme-fun .hero h1 {
+  background: linear-gradient(120deg, #e07a3d 0%, #f0a12e 50%, #e85d8a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+html.theme-fun .logo {
+  background: linear-gradient(145deg, #f0a12e 0%, #e07a3d 50%, #e85d8a 100%);
+  box-shadow: 0 4px 14px rgba(224, 122, 61, 0.35);
+}
+html.theme-fun .lang-btn {
+  background: rgba(255, 250, 242, 0.7);
+  color: var(--muted);
+}
+html.theme-fun .lang-btn.is-on {
+  color: #b84e18;
+  background: var(--accent-soft);
+  border-color: rgba(224, 122, 61, 0.4);
+}
+html.theme-fun .num-row button {
+  background: linear-gradient(145deg, #f0a12e, #e07a3d);
+  box-shadow: 0 4px 14px rgba(224, 122, 61, 0.28);
+}
+html.theme-fun .badge-num {
+  background: linear-gradient(160deg, rgba(240, 161, 46, 0.28), rgba(232, 93, 138, 0.14));
+  color: #c45a18;
+  border-color: rgba(224, 122, 61, 0.3);
+}
+html.theme-fun .tag-pill {
+  background: rgba(43, 179, 160, 0.12);
+  color: #1f8a7a;
+  border-color: rgba(43, 179, 160, 0.22);
+}
+html.theme-fun .tag-pill.board {
+  background: var(--accent-soft);
+  color: #b84e18;
+}
+html.theme-fun .tag-pill.flash-badge {
+  background: rgba(43, 179, 160, 0.16);
+  color: #1a7d6e;
+  border-color: rgba(43, 179, 160, 0.35);
+}
+html.theme-fun .card:hover {
+  border-color: rgba(224, 122, 61, 0.45);
+}
+html.theme-fun .foot,
+html.theme-fun .foot a { color: #9a7b62; }
+html.theme-fun .foot a:hover { color: var(--accent); }
+
+@media (max-width: 960px) {
+  .theme-decor .deco {
+    width: 76px;
+    height: 76px;
+    opacity: 0.6;
+  }
+  .deco.d2, .deco.d5 { display: none; }
+}
+
 /* Telefon: căsuță îngustă, centrată; număr și Deschide pe coloană */
 @media (max-width: 560px) {
   body { background-attachment: scroll; }
@@ -678,6 +826,19 @@ esp-web-install-button button[slot="activate"] {
     letter-spacing: 0.04em;
     font-size: 1rem;
   }
+  .theme-decor .deco {
+    width: 64px;
+    height: 64px;
+    border-width: 2px;
+    border-radius: 14px;
+    opacity: 0.55;
+  }
+  .deco.d1 { top: 72px; left: -10px; }
+  .deco.d2 { display: none; }
+  .deco.d3 { bottom: 16px; left: -8px; }
+  .deco.d4 { top: 72px; right: -10px; }
+  .deco.d5 { display: none; }
+  .deco.d6 { bottom: 16px; right: -8px; }
 }
 
 /* soft reduce motion */

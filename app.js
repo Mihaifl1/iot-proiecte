@@ -109,6 +109,44 @@ function setupAdminDownload() {
   });
 }
 
+function isFunTheme() {
+  return document.documentElement.classList.contains("theme-fun");
+}
+
+function applyTheme(fun) {
+  document.documentElement.classList.toggle("theme-fun", !!fun);
+  try {
+    localStorage.setItem("iot-theme", fun ? "fun" : "calm");
+  } catch (e) {
+    /* ignore */
+  }
+  const btn = document.getElementById("theme-switch");
+  if (btn) {
+    btn.setAttribute("aria-pressed", fun ? "true" : "false");
+    btn.setAttribute("aria-label", fun ? t("themeFunOn") : t("themeFunOff"));
+    btn.title = fun ? t("themeFunOn") : t("themeFunOff");
+  }
+}
+
+function renderThemeSwitch() {
+  const on = isFunTheme();
+  return `<button type="button" class="theme-switch" id="theme-switch" aria-pressed="${
+    on ? "true" : "false"
+  }" aria-label="${escapeHtml(on ? t("themeFunOn") : t("themeFunOff"))}" title="${escapeHtml(
+    on ? t("themeFunOn") : t("themeFunOff")
+  )}">
+    <span class="theme-switch-track" aria-hidden="true">
+      <span class="theme-switch-knob"></span>
+    </span>
+  </button>`;
+}
+
+function bindThemeSwitch(root) {
+  const btn = (root || document).querySelector("#theme-switch");
+  if (!btn) return;
+  btn.addEventListener("click", () => applyTheme(!isFunTheme()));
+}
+
 function renderHeader(showBack) {
   const el = $("#site-header");
   if (!el) return;
@@ -123,10 +161,12 @@ function renderHeader(showBack) {
       </a>
       <div class="top-right">
         ${mid}
+        ${renderThemeSwitch()}
         ${typeof renderLangSwitch === "function" ? renderLangSwitch() : ""}
       </div>
     </div>`;
   if (typeof bindLangSwitch === "function") bindLangSwitch(el);
+  bindThemeSwitch(el);
 }
 
 function renderHub() {

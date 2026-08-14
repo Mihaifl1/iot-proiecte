@@ -46,7 +46,7 @@ Recompilare: `python _compile_all.py` (sare peste BIN existent) sau `python _com
 
 ## Design / UX decis
 
-- Culori calme (slate/teal), **fără** desene ESP/Arduino pe homepage
+- Culori calme (slate/teal) implicit. Întrerupător sus: temă **veselă** cu foto Arduino/ESP/senzori (`html.theme-fun`, localStorage `iot-theme`)
 - **Fără** text tip „TikTok: în video scrii… link în bio” pe paginile proiect
 - Site pentru **utilizatori** care vor să **reproducă** proiecte
 - Limbi site: **RO / RU / EN** (fără a redesena UI-ul)
