@@ -25,17 +25,20 @@ Site static (GitHub Pages) + Manager Python (GUI CustomTkinter):
 | `flash.js` | Buton flash ESP + driver USB după placă |
 | `manager.py` | GUI: CRUD, Auto GitHub, firmware, draft/public |
 | `bin_builder.py` | Compilare / import `.bin` (preferă `merged.bin` pe ESP32) |
-| `firmware/` | `001.bin`, `003.bin` + manifeste |
+| `firmware/` | `001.bin`–`013.bin` + manifeste (ESP32 = merged 4 MB, flash la offset 0) |
 | `images/` | Scheme foto |
 | `fritzing/` | Scheme `.fzz` (Fritzing) — buton **Deschide Fritzing** în tab Cablare |
 | `.github/workflows/pages.yml` | Deploy GitHub Pages |
 
 ## Proiecte (stare)
 
-- **#001** ESP8266 Relay AP — `firmware/001.bin`, flash pe site OK
-- **#002** ESP32-C3 temp + 2 relee — schemă OK, **fără BIN** încă (Manager → Firmware → Generează BIN)
-- **#003** ESP8266 scheduler — `firmware/003.bin`; zilele din UI aliniate cu `tm_wday` (Du=bit0). BIN vechi încă are mapping-ul greșit până la regenerare.
-- **#004–#013** proiecte noi publice (DHT22, PIR, irigator, WS2812, 4 relee, servo, scurgere, OLED, reed, HC-SR04) — fără BIN încă
+Toate **#001–#013** sunt publice, au schemă PNG și **BIN** — buton **Încarcă pe ESP** pe site.
+
+- ESP8266: **#001** Relay AP, **#003** Scheduler, **#004** DHT22, **#006** Irigator, **#008** 4 relee, **#010** Scurgere, **#012** Reed
+- ESP32-C3 (merged.bin): **#002** Temp + 2 relee, **#005** PIR, **#007** WS2812, **#009** Servo, **#011** OLED+DHT22, **#013** HC-SR04
+- **#003**: zilele din UI aliniate cu `tm_wday` (Du=bit0). BIN regenerat la 2026-08-14.
+
+Recompilare: `python _compile_all.py` (sare peste BIN existent) sau `python _compile_all.py --force`.
 
 ## Design / UX decis
 

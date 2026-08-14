@@ -153,7 +153,7 @@ def ensure_cores(cli: Path, chip: str) -> tuple[bool, str]:
     if code != 0:
         return False, f"core update-index eșuat:\n{err or out}"
 
-    code, out, err = _run_cli(cli, "core", "install", core, timeout=900)
+    code, out, err = _run_cli(cli, "core", "install", core, timeout=3600)
     if code != 0 and "already installed" not in (out + err).lower():
         # poate e deja instalat
         code2, out2, err2 = _run_cli(cli, "core", "list", timeout=60)
@@ -352,10 +352,11 @@ def compile_project(project: dict[str, Any], auto_download_cli: bool = True) -> 
             "compile",
             "--fqbn",
             fqbn,
+            "--export-binaries",
             "--output-dir",
             str(out_dir),
             str(sketch_dir),
-            timeout=600,
+            timeout=900,
         )
         log = (out + "\n" + err).strip()
         if code != 0:

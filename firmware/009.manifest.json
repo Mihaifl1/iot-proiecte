@@ -1,0 +1,16 @@
+{
+  "name": "ESP32-C3 Servomotor web",
+  "version": "009",
+  "new_install_prompt_erase": true,
+  "builds": [
+    {
+      "chipFamily": "ESP32-C3",
+      "parts": [
+        {
+          "path": "009.bin",
+          "offset": 0
+        }
+      ]
+    }
+  ]
+}

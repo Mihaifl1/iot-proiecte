@@ -1,0 +1,16 @@
+{
+  "name": "ESP32 Temperatură + 2 relee",
+  "version": "002",
+  "new_install_prompt_erase": true,
+  "builds": [
+    {
+      "chipFamily": "ESP32-C3",
+      "parts": [
+        {
+          "path": "002.bin",
+          "offset": 0
+        }
+      ]
+    }
+  ]
+}

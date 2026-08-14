@@ -1,0 +1,16 @@
+{
+  "name": "ESP32 Bandă LED WS2812",
+  "version": "007",
+  "new_install_prompt_erase": true,
+  "builds": [
+    {
+      "chipFamily": "ESP32-C3",
+      "parts": [
+        {
+          "path": "007.bin",
+          "offset": 0
+        }
+      ]
+    }
+  ]
+}

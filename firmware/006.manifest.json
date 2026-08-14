@@ -1,0 +1,16 @@
+{
+  "name": "ESP8266 Irigator plante",
+  "version": "006",
+  "new_install_prompt_erase": true,
+  "builds": [
+    {
+      "chipFamily": "ESP8266",
+      "parts": [
+        {
+          "path": "006.bin",
+          "offset": 0
+        }
+      ]
+    }
+  ]
+}

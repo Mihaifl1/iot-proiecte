@@ -1,0 +1,16 @@
+{
+  "name": "ESP32 Meteo OLED + DHT22",
+  "version": "011",
+  "new_install_prompt_erase": true,
+  "builds": [
+    {
+      "chipFamily": "ESP32-C3",
+      "parts": [
+        {
+          "path": "011.bin",
+          "offset": 0
+        }
+      ]
+    }
+  ]
+}

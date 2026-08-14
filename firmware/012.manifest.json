@@ -1,0 +1,16 @@
+{
+  "name": "ESP8266 Contact ușă (reed)",
+  "version": "012",
+  "new_install_prompt_erase": true,
+  "builds": [
+    {
+      "chipFamily": "ESP8266",
+      "parts": [
+        {
+          "path": "012.bin",
+          "offset": 0
+        }
+      ]
+    }
+  ]
+}
