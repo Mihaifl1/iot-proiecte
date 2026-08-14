@@ -30,6 +30,13 @@ Site static (GitHub Pages) + Manager Python (GUI CustomTkinter):
 | `fritzing/` | Scheme `.fzz` (Fritzing) — buton **Deschide Fritzing** în tab Cablare |
 | `.github/workflows/pages.yml` | Deploy GitHub Pages |
 | `downloads/iot-manager.zip` | Manager Python, parolă **admin123** (site `#/admin` + arhiva) |
+| `data/shop.json` | Produse magazin (prețuri MDL, stoc, public) |
+| `shop-data.js` | Generat din shop.json — **doar produsele publice** |
+| `shop/` | Magazin: https://esp-proiecte.md/shop/ · țintă DNS: **shop.esp-proiecte.md** |
+
+**Magazin:** tab **Magazin** în Manager → schimbi prețul/stocul → **Salvează** (Auto GitHub).  
+Plata online **nu e legată încă** — coș + formular de comandă (local). Când vrei încasare reală, spui metoda (Paynet, MIPay, Stripe, ramburs).  
+DNS `shop.esp-proiecte.md`: CNAME către același GitHub Pages; dacă certificatul HTTPS nu acoperă subdomeniul, folosește Cloudflare (proxy) sau redirect `shop.` → `https://esp-proiecte.md/shop/`. Root-ul detectează host-ul `shop.esp-proiecte.md` și trimite la `/shop/`.
 
 Descărcare Manager pe site: [https://esp-proiecte.md/#/admin](https://esp-proiecte.md/#/admin) — parolă `admin123`.  
 Regenerează arhiva după modificări: `python _pack_manager.py`

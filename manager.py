@@ -39,6 +39,8 @@ ROOT = Path(__file__).resolve().parent
 DATA_DIR = ROOT / "data"
 JSON_PATH = DATA_DIR / "projects.json"
 JS_PATH = ROOT / "projects-data.js"
+SHOP_JSON_PATH = DATA_DIR / "shop.json"
+SHOP_JS_PATH = ROOT / "shop-data.js"
 IMAGES_DIR = ROOT / "images"
 FRITZING_DIR = ROOT / "fritzing"
 INDEX_PATH = ROOT / "index.html"
@@ -202,6 +204,33 @@ def generate_js(projects: list[dict[str, Any]]) -> None:
     tmp = JS_PATH.with_name(JS_PATH.name + ".tmp")
     tmp.write_text(js, encoding="utf-8", newline="\n")
     os.replace(tmp, JS_PATH)
+
+
+def load_shop() -> list[dict[str, Any]]:
+    if not SHOP_JSON_PATH.exists():
+        return []
+    with open(SHOP_JSON_PATH, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    return data if isinstance(data, list) else []
+
+
+def save_shop(items: list[dict[str, Any]]) -> None:
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    with open(SHOP_JSON_PATH, "w", encoding="utf-8") as f:
+        json.dump(items, f, ensure_ascii=False, indent=2)
+        f.write("\n")
+
+
+def generate_shop_js(items: list[dict[str, Any]]) -> None:
+    public = [p for p in items if p.get("published", True) is not False]
+    body = json.dumps(public, ensure_ascii=False, indent=2)
+    js = (
+        "/* Generat automat din data/shop.json — nu edita manual */\n"
+        f"window.SHOP_PRODUCTS = {body};\n"
+    )
+    tmp = SHOP_JS_PATH.with_name(SHOP_JS_PATH.name + ".tmp")
+    tmp.write_text(js, encoding="utf-8", newline="\n")
+    os.replace(tmp, SHOP_JS_PATH)
 
 
 def next_id(projects: list[dict[str, Any]]) -> str:
@@ -523,8 +552,10 @@ class ManagerApp(ctk.CTk):
         self.configure(fg_color=COLORS["bg"])
 
         self.projects: list[dict[str, Any]] = ensure_data()
+        self.shop: list[dict[str, Any]] = load_shop()
         self.current_index: int | None = None
         self._dirty = False
+        self._shop_rows: list[dict[str, Any]] = []
         self._list_buttons: list[ctk.CTkButton] = []
         self._wiring_rows: list[tuple[ctk.CTkEntry, ctk.CTkEntry]] = []
         self._settings = load_settings()
@@ -691,6 +722,7 @@ class ManagerApp(ctk.CTk):
         self.tab_sketch = self.tabs.add("Sketch")
         self.tab_firmware = self.tabs.add("Firmware")
         self.tab_schema = self.tabs.add("Schemă foto")
+        self.tab_shop = self.tabs.add("Magazin")
 
         self._build_info_tab()
         self._build_wiring_tab()
@@ -699,6 +731,7 @@ class ManagerApp(ctk.CTk):
         self._build_sketch_tab()
         self._build_firmware_tab()
         self._build_schema_tab()
+        self._build_shop_tab()
 
         # Footer tip
         foot = ctk.CTkLabel(
@@ -1033,6 +1066,143 @@ class ManagerApp(ctk.CTk):
         )
         self.schema_preview.pack(fill="both", expand=True, pady=16)
 
+    def _build_shop_tab(self) -> None:
+        wrap = ctk.CTkFrame(self.tab_shop, fg_color="transparent")
+        wrap.pack(fill="both", expand=True, padx=8, pady=8)
+        head = ctk.CTkFrame(wrap, fg_color="transparent")
+        head.pack(fill="x", pady=(0, 8))
+        ctk.CTkLabel(
+            head,
+            text="Magazin · editează prețurile (MDL) și stocul. Salvează + Auto GitHub le urcă pe site.",
+            text_color=COLORS["muted"],
+            wraplength=640,
+            justify="left",
+        ).pack(side="left", fill="x", expand=True)
+        ctk.CTkButton(
+            head,
+            text="+ Produs",
+            width=110,
+            height=32,
+            fg_color=COLORS["green"],
+            hover_color="#16a34a",
+            text_color="#052e16",
+            command=self._add_shop_product,
+        ).pack(side="right")
+        self.shop_scroll = ctk.CTkScrollableFrame(wrap, fg_color="transparent")
+        self.shop_scroll.pack(fill="both", expand=True)
+        self._fill_shop_tab()
+
+    def _fill_shop_tab(self) -> None:
+        for w in self.shop_scroll.winfo_children():
+            w.destroy()
+        self._shop_rows = []
+        hdr = ctk.CTkFrame(self.shop_scroll, fg_color="transparent")
+        hdr.pack(fill="x", pady=(0, 4))
+        for txt, w in (("Titlu", 220), ("Preț MDL", 80), ("Stoc", 60), ("Categorie", 110), ("Public", 70)):
+            ctk.CTkLabel(hdr, text=txt, text_color=COLORS["muted"], width=w, anchor="w").pack(
+                side="left", padx=4
+            )
+        for item in self.shop:
+            self._add_shop_row(item)
+
+    def _add_shop_row(self, item: dict[str, Any] | None = None) -> None:
+        item = item or {
+            "id": f"p{len(self.shop) + 1:03d}",
+            "title": "Produs nou",
+            "short": "",
+            "price": 0,
+            "currency": "MDL",
+            "stock": 0,
+            "category": "Accesorii",
+            "image": "",
+            "usedIn": [],
+            "published": True,
+        }
+        row = ctk.CTkFrame(self.shop_scroll, fg_color=COLORS["card"], corner_radius=8)
+        row.pack(fill="x", pady=3)
+        ent_title = ctk.CTkEntry(row, width=220, height=32, fg_color=COLORS["input"], border_color=COLORS["border"])
+        ent_price = ctk.CTkEntry(row, width=80, height=32, fg_color=COLORS["input"], border_color=COLORS["border"])
+        ent_stock = ctk.CTkEntry(row, width=60, height=32, fg_color=COLORS["input"], border_color=COLORS["border"])
+        ent_cat = ctk.CTkEntry(row, width=110, height=32, fg_color=COLORS["input"], border_color=COLORS["border"])
+        var_pub = ctk.BooleanVar(value=item.get("published", True) is not False)
+        ent_title.pack(side="left", padx=4, pady=6)
+        ent_price.pack(side="left", padx=4)
+        ent_stock.pack(side="left", padx=4)
+        ent_cat.pack(side="left", padx=4)
+        ctk.CTkCheckBox(row, text="", variable=var_pub, width=28, fg_color=COLORS["green"]).pack(
+            side="left", padx=8
+        )
+        rec = {
+            "id": str(item.get("id") or ""),
+            "short": item.get("short") or "",
+            "image": item.get("image") or "",
+            "usedIn": list(item.get("usedIn") or []),
+            "currency": item.get("currency") or "MDL",
+            "title": ent_title,
+            "price": ent_price,
+            "stock": ent_stock,
+            "category": ent_cat,
+            "published": var_pub,
+            "frame": row,
+        }
+        ctk.CTkButton(
+            row,
+            text="Șterge",
+            width=70,
+            height=30,
+            fg_color=COLORS["pink"],
+            hover_color="#be123c",
+            command=lambda r=rec: self._delete_shop_row(r),
+        ).pack(side="right", padx=6)
+        ent_title.insert(0, str(item.get("title") or ""))
+        ent_price.insert(0, str(item.get("price") if item.get("price") is not None else 0))
+        ent_stock.insert(0, str(item.get("stock") if item.get("stock") is not None else 0))
+        ent_cat.insert(0, str(item.get("category") or ""))
+        for ent in (ent_title, ent_price, ent_stock, ent_cat):
+            ent.bind("<KeyRelease>", lambda *_: self._mark_dirty())
+        self._shop_rows.append(rec)
+
+    def _delete_shop_row(self, rec: dict[str, Any]) -> None:
+        if rec in self._shop_rows:
+            self._shop_rows.remove(rec)
+        rec["frame"].destroy()
+        self._mark_dirty()
+
+    def _add_shop_product(self) -> None:
+        self._add_shop_row(None)
+        self._mark_dirty()
+
+    def _collect_shop_ui(self) -> None:
+        out: list[dict[str, Any]] = []
+        for rec in self._shop_rows:
+            try:
+                price = float(str(rec["price"].get()).replace(",", ".").strip() or 0)
+            except ValueError:
+                price = 0.0
+            try:
+                stock = int(float(str(rec["stock"].get()).strip() or 0))
+            except ValueError:
+                stock = 0
+            slug = rec["id"] or re.sub(r"[^\w\-]+", "-", rec["title"].get().strip().lower()).strip("-")
+            out.append(
+                {
+                    "id": slug or f"p{len(out) + 1:03d}",
+                    "title": rec["title"].get().strip() or "Fără titlu",
+                    "short": rec["short"],
+                    "price": price,
+                    "currency": rec.get("currency") or "MDL",
+                    "stock": stock,
+                    "category": rec["category"].get().strip() or "Accesorii",
+                    "image": rec.get("image") or "",
+                    "usedIn": rec.get("usedIn") or [],
+                    "published": bool(rec["published"].get()),
+                }
+            )
+        self.shop = out
+
+    def _mark_dirty(self) -> None:
+        self._dirty = True
+
     # ── List ────────────────────────────────────────────────────────────────
 
     def _filtered(self) -> list[tuple[int, dict[str, Any]]]:
@@ -1238,8 +1408,11 @@ class ManagerApp(ctk.CTk):
     def _write_data(self) -> bool:
         """Salvează JSON + JS. Nu lasă un projects-data.js stricat pe disc."""
         try:
+            self._collect_shop_ui()
             save_json(self.projects)
             generate_js(self.projects)
+            save_shop(self.shop)
+            generate_shop_js(self.shop)
             return True
         except Exception as e:
             messagebox.showerror(

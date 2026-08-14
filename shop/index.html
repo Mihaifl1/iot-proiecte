@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Magazin IoT – componente ESP</title>
+  <meta name="description" content="Componente pentru proiectele ESP: plăci, senzori, relee. Prețuri în MDL." />
+  <link rel="stylesheet" href="../styles.css?v=6" />
+  <script>
+    try {
+      if (localStorage.getItem("iot-theme") === "fun") {
+        document.documentElement.classList.add("theme-fun");
+      }
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <div id="theme-decor" class="theme-decor" aria-hidden="true">
+    <img class="deco d1" src="../images/theme/esp8266.jpg" alt="" />
+    <img class="deco d2" src="../images/theme/arduino.jpg" alt="" />
+    <img class="deco d3" src="../images/theme/dht22.jpg" alt="" />
+    <img class="deco d4" src="../images/theme/esp32.jpg" alt="" />
+    <img class="deco d5" src="../images/theme/relay.jpg" alt="" />
+    <img class="deco d6" src="../images/theme/hcsr04.jpg" alt="" />
+  </div>
+  <div class="wrap">
+    <header id="site-header"></header>
+
+    <section class="hero">
+      <h1 data-i18n="shopTitle">Magazin componente</h1>
+      <p data-i18n="shopLead">Tot ce-ți trebuie ca să reproduci proiectele ESP. Adaugi în coș, prețurile sunt în lei (MDL).</p>
+    </section>
+
+    <div class="shop-toolbar">
+      <div class="shop-cats" id="shop-cats"></div>
+      <button type="button" class="btn ghost" id="btn-cart" data-i18n="shopCart">Coș (0)</button>
+    </div>
+
+    <div class="shop-grid" id="shop-grid"></div>
+    <p class="num-error" id="shop-empty"></p>
+
+    <div id="cart-panel" class="panel shop-cart hidden">
+      <h2 data-i18n="shopCartTitle">Coșul tău</h2>
+      <div id="cart-lines"></div>
+      <p class="shop-total" id="cart-total"></p>
+      <form id="order-form" class="order-form">
+        <label><span data-i18n="shopName">Nume</span>
+          <input type="text" id="ord-name" required autocomplete="name" />
+        </label>
+        <label><span data-i18n="shopPhone">Telefon</span>
+          <input type="tel" id="ord-phone" required autocomplete="tel" />
+        </label>
+        <label><span data-i18n="shopCity">Oraș</span>
+          <input type="text" id="ord-city" required autocomplete="address-level2" />
+        </label>
+        <label class="full"><span data-i18n="shopNote">Notă (opțional)</span>
+          <textarea id="ord-note" rows="2"></textarea>
+        </label>
+        <p class="num-hint" data-i18n="shopPayHint">Plata online reală urmează. Acum comanda se înregistrează și te contactăm.</p>
+        <button type="submit" class="btn" data-i18n="shopOrder">Trimite comanda</button>
+      </form>
+      <p class="num-hint" id="order-ok" hidden></p>
+    </div>
+
+    <p class="foot">
+      <a href="../" data-i18n="shopBack">← Proiecte IoT</a>
+    </p>
+  </div>
+
+  <script src="../shop-data.js"></script>
+  <script src="../i18n.js"></script>
+  <script src="shop.js"></script>
+</body>
+</html>
