@@ -8,7 +8,7 @@ window.SHOP_PRODUCTS = [
     "currency": "MDL",
     "stock": 20,
     "category": "Plăci",
-    "image": "../images/theme/esp8266.jpg",
+    "image": "/images/theme/esp8266.jpg",
     "usedIn": [
       "001",
       "003",
@@ -28,7 +28,7 @@ window.SHOP_PRODUCTS = [
     "currency": "MDL",
     "stock": 16,
     "category": "Plăci",
-    "image": "../images/theme/esp32.jpg",
+    "image": "/images/theme/esp32.jpg",
     "usedIn": [
       "002",
       "005",
@@ -47,7 +47,7 @@ window.SHOP_PRODUCTS = [
     "currency": "MDL",
     "stock": 8,
     "category": "Plăci",
-    "image": "../images/theme/arduino.jpg",
+    "image": "/images/theme/arduino.jpg",
     "usedIn": [],
     "published": true
   },
@@ -59,7 +59,7 @@ window.SHOP_PRODUCTS = [
     "currency": "MDL",
     "stock": 30,
     "category": "Relee",
-    "image": "../images/theme/relay.jpg",
+    "image": "/images/theme/relay.jpg",
     "usedIn": [
       "001",
       "003",
@@ -76,7 +76,7 @@ window.SHOP_PRODUCTS = [
     "currency": "MDL",
     "stock": 18,
     "category": "Relee",
-    "image": "../images/theme/relay.jpg",
+    "image": "/images/theme/relay.jpg",
     "usedIn": [
       "002"
     ],
@@ -90,7 +90,7 @@ window.SHOP_PRODUCTS = [
     "currency": "MDL",
     "stock": 10,
     "category": "Relee",
-    "image": "../images/theme/relay.jpg",
+    "image": "/images/theme/relay.jpg",
     "usedIn": [
       "008"
     ],
@@ -104,7 +104,7 @@ window.SHOP_PRODUCTS = [
     "currency": "MDL",
     "stock": 22,
     "category": "Senzori",
-    "image": "../images/theme/dht22.jpg",
+    "image": "/images/theme/dht22.jpg",
     "usedIn": [
       "004",
       "011"
@@ -119,7 +119,7 @@ window.SHOP_PRODUCTS = [
     "currency": "MDL",
     "stock": 24,
     "category": "Senzori",
-    "image": "../images/theme/dht22.jpg",
+    "image": "/images/theme/dht22.jpg",
     "usedIn": [
       "002"
     ],
@@ -133,7 +133,7 @@ window.SHOP_PRODUCTS = [
     "currency": "MDL",
     "stock": 20,
     "category": "Senzori",
-    "image": "../images/theme/hcsr04.jpg",
+    "image": "/images/theme/hcsr04.jpg",
     "usedIn": [
       "005"
     ],
@@ -147,7 +147,7 @@ window.SHOP_PRODUCTS = [
     "currency": "MDL",
     "stock": 20,
     "category": "Senzori",
-    "image": "../images/theme/hcsr04.jpg",
+    "image": "/images/theme/hcsr04.jpg",
     "usedIn": [
       "013"
     ],

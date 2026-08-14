@@ -7,7 +7,7 @@
     "currency": "MDL",
     "stock": 20,
     "category": "Plăci",
-    "image": "../images/theme/esp8266.jpg",
+    "image": "/images/theme/esp8266.jpg",
     "usedIn": ["001", "003", "004", "006", "008", "010", "012"],
     "published": true
   },
@@ -19,7 +19,7 @@
     "currency": "MDL",
     "stock": 16,
     "category": "Plăci",
-    "image": "../images/theme/esp32.jpg",
+    "image": "/images/theme/esp32.jpg",
     "usedIn": ["002", "005", "007", "009", "011", "013"],
     "published": true
   },
@@ -31,7 +31,7 @@
     "currency": "MDL",
     "stock": 8,
     "category": "Plăci",
-    "image": "../images/theme/arduino.jpg",
+    "image": "/images/theme/arduino.jpg",
     "usedIn": [],
     "published": true
   },
@@ -43,7 +43,7 @@
     "currency": "MDL",
     "stock": 30,
     "category": "Relee",
-    "image": "../images/theme/relay.jpg",
+    "image": "/images/theme/relay.jpg",
     "usedIn": ["001", "003", "006", "010"],
     "published": true
   },
@@ -55,7 +55,7 @@
     "currency": "MDL",
     "stock": 18,
     "category": "Relee",
-    "image": "../images/theme/relay.jpg",
+    "image": "/images/theme/relay.jpg",
     "usedIn": ["002"],
     "published": true
   },
@@ -67,7 +67,7 @@
     "currency": "MDL",
     "stock": 10,
     "category": "Relee",
-    "image": "../images/theme/relay.jpg",
+    "image": "/images/theme/relay.jpg",
     "usedIn": ["008"],
     "published": true
   },
@@ -79,7 +79,7 @@
     "currency": "MDL",
     "stock": 22,
     "category": "Senzori",
-    "image": "../images/theme/dht22.jpg",
+    "image": "/images/theme/dht22.jpg",
     "usedIn": ["004", "011"],
     "published": true
   },
@@ -91,7 +91,7 @@
     "currency": "MDL",
     "stock": 24,
     "category": "Senzori",
-    "image": "../images/theme/dht22.jpg",
+    "image": "/images/theme/dht22.jpg",
     "usedIn": ["002"],
     "published": true
   },
@@ -103,7 +103,7 @@
     "currency": "MDL",
     "stock": 20,
     "category": "Senzori",
-    "image": "../images/theme/hcsr04.jpg",
+    "image": "/images/theme/hcsr04.jpg",
     "usedIn": ["005"],
     "published": true
   },
@@ -115,7 +115,7 @@
     "currency": "MDL",
     "stock": 20,
     "category": "Senzori",
-    "image": "../images/theme/hcsr04.jpg",
+    "image": "/images/theme/hcsr04.jpg",
     "usedIn": ["013"],
     "published": true
   },

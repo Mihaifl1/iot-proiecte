@@ -59,12 +59,12 @@ function renderHeader() {
   const on = document.documentElement.classList.contains("theme-fun");
   el.innerHTML = `
     <div class="top">
-      <a class="brand" href="./">
+      <a class="brand" href="/shop/">
         <span class="logo">IoT</span>
         <span>${escapeHtml(t("shopBrand"))}</span>
       </a>
       <div class="top-right">
-        <a class="back-link" href="../">${escapeHtml(t("shopBack"))}</a>
+        <a class="back-link" href="/">${escapeHtml(t("shopBack"))}</a>
         <button type="button" class="theme-switch" id="theme-switch" aria-pressed="${
           on ? "true" : "false"
         }" aria-label="${escapeHtml(on ? t("themeFunOn") : t("themeFunOff"))}">
