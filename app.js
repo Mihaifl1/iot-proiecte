@@ -161,7 +161,7 @@ function renderHeader(showBack) {
       </a>
       <div class="top-right">
         ${mid}
-        <a class="shop-nav" href="/shop/">${escapeHtml(t("shopLink"))}</a>
+        <a class="shop-nav" href="https://esp-proiecte.md/shop/">${escapeHtml(t("shopLink"))}</a>
         ${renderThemeSwitch()}
         ${typeof renderLangSwitch === "function" ? renderLangSwitch() : ""}
       </div>
