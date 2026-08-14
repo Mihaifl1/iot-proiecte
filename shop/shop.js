@@ -224,7 +224,101 @@ function renderCart() {
   });
 }
 
+const ORDERS_KEY = "iot-shop-orders";
+const ORDERS_OK_KEY = "iot-shop-orders-ok";
+const ORDERS_PW =
+  "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9";
+
+function loadOrders() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(ORDERS_KEY) || "[]");
+    return Array.isArray(raw) ? raw : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function isOrdersRoute() {
+  const h = location.hash.replace(/^#\/?/, "").toLowerCase();
+  return h === "comenzi" || h === "orders";
+}
+
+function showShopViews(orders) {
+  const shop = $("#view-shop");
+  const ord = $("#view-orders");
+  if (shop) shop.classList.toggle("active", !orders);
+  if (ord) ord.classList.toggle("active", !!orders);
+}
+
+function formatOrderItems(order) {
+  const list = products();
+  const items = order.items || {};
+  return Object.keys(items)
+    .map((id) => {
+      const p = list.find((x) => x.id === id);
+      const title = p ? p.title : id;
+      return title + " × " + items[id];
+    })
+    .join(", ");
+}
+
+function renderOrders() {
+  showShopViews(true);
+  if (typeof applyStaticI18n === "function") applyStaticI18n();
+  renderHeader();
+  const gate = $("#orders-gate");
+  const listEl = $("#orders-list");
+  const unlocked = sessionStorage.getItem(ORDERS_OK_KEY) === "1";
+  if (!unlocked) {
+    if (gate) gate.classList.remove("hidden");
+    if (listEl) {
+      listEl.classList.add("hidden");
+      listEl.innerHTML = "";
+    }
+    return;
+  }
+  if (gate) gate.classList.add("hidden");
+  if (!listEl) return;
+  const orders = loadOrders().slice().reverse();
+  if (!orders.length) {
+    listEl.classList.remove("hidden");
+    listEl.innerHTML = `<p class="num-hint">${escapeHtml(t("ordersEmpty"))}</p>`;
+    return;
+  }
+  listEl.classList.remove("hidden");
+  listEl.innerHTML =
+    orders
+      .map((o) => {
+        const when = o.at ? new Date(o.at).toLocaleString() : "—";
+        return `<article class="panel">
+          <h2>${escapeHtml(when)}</h2>
+          <p><b>${escapeHtml(o.name || "")}</b> · ${escapeHtml(o.phone || "")} · ${escapeHtml(
+          o.city || ""
+        )}</p>
+          <p>${escapeHtml(formatOrderItems(o))}</p>
+          <p class="shop-total">${escapeHtml(money(o.total, o.currency || "MDL"))}</p>
+          ${o.note ? `<p>${escapeHtml(o.note)}</p>` : ""}
+        </article>`;
+      })
+      .join("") +
+    `<p><button type="button" class="btn ghost" id="btn-clear-orders">${escapeHtml(
+      t("ordersClear")
+    )}</button></p>`;
+  const clr = $("#btn-clear-orders");
+  if (clr) {
+    clr.addEventListener("click", () => {
+      localStorage.removeItem(ORDERS_KEY);
+      renderOrders();
+    });
+  }
+}
+
 function renderAll() {
+  if (isOrdersRoute()) {
+    renderOrders();
+    return;
+  }
+  showShopViews(false);
   if (typeof applyStaticI18n === "function") applyStaticI18n();
   renderHeader();
   renderCats();
@@ -269,9 +363,9 @@ document.addEventListener("DOMContentLoaded", () => {
       currency: "MDL",
     };
     try {
-      const prev = JSON.parse(localStorage.getItem("iot-shop-orders") || "[]");
+      const prev = JSON.parse(localStorage.getItem(ORDERS_KEY) || "[]");
       prev.push(order);
-      localStorage.setItem("iot-shop-orders", JSON.stringify(prev));
+      localStorage.setItem(ORDERS_KEY, JSON.stringify(prev));
     } catch (err) {}
     saveCart({});
     renderCartBtn();
@@ -280,5 +374,47 @@ document.addEventListener("DOMContentLoaded", () => {
     ok.hidden = false;
     ok.textContent = t("shopOrderOk");
     e.target.reset();
+    const phone = String((window.SHOP_SETTINGS || {}).notifyPhone || "").replace(/\D/g, "");
+    if (phone) {
+      const lines = [
+        "Comanda magazin ESP",
+        order.name + " / " + order.phone + " / " + order.city,
+        formatOrderItems(order),
+        "Total: " + money(order.total, "MDL"),
+        order.note || "",
+      ];
+      const url = "https://wa.me/" + phone + "?text=" + encodeURIComponent(lines.join("\n"));
+      window.open(url, "_blank");
+    }
   });
+
+  const btnOk = $("#btn-orders-ok");
+  const pass = $("#orders-pass");
+  const unlock = async () => {
+    const err = $("#orders-error");
+    const hex = await sha256hex((pass && pass.value) || "");
+    if (hex !== ORDERS_PW) {
+      if (err) {
+        err.textContent = t("adminBadPw");
+        err.classList.add("show");
+      }
+      return;
+    }
+    sessionStorage.setItem(ORDERS_OK_KEY, "1");
+    renderOrders();
+  };
+  if (btnOk) btnOk.addEventListener("click", unlock);
+  if (pass) {
+    pass.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") unlock();
+    });
+  }
+  window.addEventListener("hashchange", renderAll);
 });
+
+async function sha256hex(text) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}

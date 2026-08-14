@@ -26,6 +26,7 @@
   <div class="wrap">
     <header id="site-header"></header>
 
+    <div id="view-shop" class="view active">
     <section class="hero">
       <h1 data-i18n="shopTitle">Magazin componente</h1>
       <p data-i18n="shopLead">Tot ce-ți trebuie ca să reproduci proiectele ESP. Adaugi în coș, prețurile sunt în lei (MDL).</p>
@@ -61,14 +62,33 @@
       </form>
       <p class="num-hint" id="order-ok" hidden></p>
     </div>
+    </div>
+
+    <div id="view-orders" class="view">
+      <section class="hero">
+        <h1 data-i18n="ordersTitle">Comenzi</h1>
+        <p data-i18n="ordersLead">Comenzile date pe acest telefon/PC. Parolă: aceeași ca la Manager.</p>
+      </section>
+      <div class="num-box admin-box" id="orders-gate">
+        <label for="orders-pass" data-i18n="adminPassLabel">Parolă</label>
+        <div class="num-row">
+          <input id="orders-pass" type="password" autocomplete="current-password" />
+          <button type="button" id="btn-orders-ok" data-i18n="open">Deschide</button>
+        </div>
+        <p class="num-error" id="orders-error"></p>
+      </div>
+      <div id="orders-list" class="hidden"></div>
+    </div>
 
     <p class="foot">
       <a href="/" data-i18n="shopBack">← Proiecte IoT</a>
+      <span class="foot-sep"> · </span>
+      <a href="#/comenzi" data-i18n="ordersLink">Comenzi</a>
     </p>
   </div>
 
   <script src="/shop-data.js"></script>
-  <script src="/i18n.js?v=3"></script>
-  <script src="/shop/shop.js?v=2"></script>
+  <script src="/i18n.js?v=4"></script>
+  <script src="/shop/shop.js?v=3"></script>
 </body>
 </html>

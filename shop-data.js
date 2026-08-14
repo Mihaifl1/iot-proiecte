@@ -320,3 +320,4 @@ window.SHOP_PRODUCTS = [
     "published": true
   }
 ];
+window.SHOP_SETTINGS = {"notifyPhone": ""};

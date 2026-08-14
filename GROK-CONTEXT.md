@@ -34,8 +34,9 @@ Site static (GitHub Pages) + Manager Python (GUI CustomTkinter):
 | `shop-data.js` | Generat din shop.json — **doar produsele publice** |
 | `shop/` | Magazin: **https://esp-proiecte.md/shop/** |
 
-**Magazin:** https://esp-proiecte.md/shop/ · tab **Magazin** în Manager → preț/stoc → **Salvează**.  
-Plata online nu e legată încă. Comanda se salvează local.
+**Magazin:** https://esp-proiecte.md/shop/  
+**Comenzi:** https://esp-proiecte.md/shop/#/comenzi — parolă `admin123` (comenzile de pe **acest** telefon/PC).  
+Ca să-ți vină comenzile de la clienți: Manager → Magazin → câmp **WhatsApp comenzi** (`3736xxxxxxx`) → Salvează. La „Trimite comanda” se deschide WhatsApp către tine.
 
 Descărcare Manager pe site: [https://esp-proiecte.md/#/admin](https://esp-proiecte.md/#/admin) — parolă `admin123`.  
 Regenerează arhiva după modificări: `python _pack_manager.py`

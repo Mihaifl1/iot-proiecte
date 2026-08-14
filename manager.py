@@ -40,6 +40,7 @@ DATA_DIR = ROOT / "data"
 JSON_PATH = DATA_DIR / "projects.json"
 JS_PATH = ROOT / "projects-data.js"
 SHOP_JSON_PATH = DATA_DIR / "shop.json"
+SHOP_SETTINGS_PATH = DATA_DIR / "shop-settings.json"
 SHOP_JS_PATH = ROOT / "shop-data.js"
 IMAGES_DIR = ROOT / "images"
 FRITZING_DIR = ROOT / "fritzing"
@@ -221,12 +222,31 @@ def save_shop(items: list[dict[str, Any]]) -> None:
         f.write("\n")
 
 
-def generate_shop_js(items: list[dict[str, Any]]) -> None:
+def load_shop_settings() -> dict[str, Any]:
+    if not SHOP_SETTINGS_PATH.exists():
+        return {"notifyPhone": ""}
+    with open(SHOP_SETTINGS_PATH, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    return data if isinstance(data, dict) else {"notifyPhone": ""}
+
+
+def save_shop_settings(settings: dict[str, Any]) -> None:
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    with open(SHOP_SETTINGS_PATH, "w", encoding="utf-8") as f:
+        json.dump(settings, f, ensure_ascii=False, indent=2)
+        f.write("\n")
+
+
+def generate_shop_js(items: list[dict[str, Any]], settings: dict[str, Any] | None = None) -> None:
     public = [p for p in items if p.get("published", True) is not False]
     body = json.dumps(public, ensure_ascii=False, indent=2)
+    cfg = settings if settings is not None else load_shop_settings()
+    phone = str(cfg.get("notifyPhone") or "").strip()
+    settings_js = json.dumps({"notifyPhone": phone}, ensure_ascii=False)
     js = (
         "/* Generat automat din data/shop.json — nu edita manual */\n"
         f"window.SHOP_PRODUCTS = {body};\n"
+        f"window.SHOP_SETTINGS = {settings_js};\n"
     )
     tmp = SHOP_JS_PATH.with_name(SHOP_JS_PATH.name + ".tmp")
     tmp.write_text(js, encoding="utf-8", newline="\n")
@@ -1073,7 +1093,7 @@ class ManagerApp(ctk.CTk):
         head.pack(fill="x", pady=(0, 8))
         ctk.CTkLabel(
             head,
-            text="Magazin · editează prețurile (MDL) și stocul. Salvează + Auto GitHub le urcă pe site.",
+            text="Magazin · prețuri (MDL) și stoc. Salvează + Auto GitHub. Comenzi: esp-proiecte.md/shop/#/comenzi (parolă admin123).",
             text_color=COLORS["muted"],
             wraplength=640,
             justify="left",
@@ -1088,6 +1108,24 @@ class ManagerApp(ctk.CTk):
             text_color="#052e16",
             command=self._add_shop_product,
         ).pack(side="right")
+        phone_row = ctk.CTkFrame(wrap, fg_color="transparent")
+        phone_row.pack(fill="x", pady=(0, 8))
+        ctk.CTkLabel(
+            phone_row,
+            text="WhatsApp comenzi (ex: 3736xxxxxxx) — clientul îți trimite comanda pe WhatsApp:",
+            text_color=COLORS["muted"],
+        ).pack(anchor="w")
+        self.ent_shop_phone = ctk.CTkEntry(
+            phone_row,
+            height=34,
+            fg_color=COLORS["input"],
+            border_color=COLORS["border"],
+            placeholder_text="3736xxxxxxx",
+        )
+        self.ent_shop_phone.pack(fill="x", pady=(4, 0))
+        saved_phone = str(load_shop_settings().get("notifyPhone") or "")
+        if saved_phone:
+            self.ent_shop_phone.insert(0, saved_phone)
         self.shop_scroll = ctk.CTkScrollableFrame(wrap, fg_color="transparent")
         self.shop_scroll.pack(fill="both", expand=True)
         self._fill_shop_tab()
@@ -1412,7 +1450,14 @@ class ManagerApp(ctk.CTk):
             save_json(self.projects)
             generate_js(self.projects)
             save_shop(self.shop)
-            generate_shop_js(self.shop)
+            phone = ""
+            try:
+                phone = self.ent_shop_phone.get().strip()
+            except Exception:
+                phone = load_shop_settings().get("notifyPhone") or ""
+            settings = {"notifyPhone": phone}
+            save_shop_settings(settings)
+            generate_shop_js(self.shop, settings)
             return True
         except Exception as e:
             messagebox.showerror(
