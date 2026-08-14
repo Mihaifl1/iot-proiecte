@@ -95,7 +95,7 @@ function renderCats() {
     .map((c) => {
       const label = c === "all" ? t("shopAll") : c;
       const on = currentCat() === c ? " is-on" : "";
-      return `<button type="button" class="lang-btn${on}" data-cat="${escapeHtml(c)}">${escapeHtml(
+      return `<button type="button" class="shop-cat-btn${on}" data-cat="${escapeHtml(c)}">${escapeHtml(
         label
       )}</button>`;
     })
@@ -124,7 +124,8 @@ function renderGrid() {
   }
   if (empty) empty.classList.remove("show");
   grid.innerHTML = list
-    .map((p) => {
+    .map((raw) => {
+      const p = typeof localizedShopProduct === "function" ? localizedShopProduct(raw) : raw;
       const img = p.image
         ? `<img class="shop-img" src="${escapeHtml(p.image)}" alt="${escapeHtml(p.title)}" />`
         : `<div class="shop-img shop-img-ph">${escapeHtml((p.title || "?").slice(0, 1))}</div>`;
@@ -199,7 +200,9 @@ function renderCart() {
   const list = products();
   lines.innerHTML = ids
     .map((id) => {
-      const p = list.find((x) => x.id === id);
+      const p = typeof localizedShopProduct === "function"
+        ? localizedShopProduct(list.find((x) => x.id === id))
+        : list.find((x) => x.id === id);
       if (!p) return "";
       const q = Number(cart[id]);
       const line = Number(p.price) * q;
@@ -228,6 +231,11 @@ function renderAll() {
   renderGrid();
   renderCartBtn();
   renderCart();
+}
+
+function shopSetLang(lang) {
+  if (typeof setLang === "function") setLang(lang);
+  else renderAll();
 }
 
 document.addEventListener("DOMContentLoaded", () => {

@@ -48,6 +48,7 @@ const I18N = {
     shopOrderOk: "Comanda e înregistrată. Te contactăm pe telefon. Plata online o legăm după ce îmi spui cum vrei să încasezi.",
     shopNone: "Niciun produs în această categorie.",
     shopBack: "← Proiecte IoT",
+    shopMetaTitle: "Magazin IoT – componente ESP",
     flashBadge: "USB flash",
     notFound: "Nu există proiectul #{id}. Încearcă 001, 002, 003…",
     notFoundId: "Proiectul #{id} nu există.",
@@ -142,6 +143,7 @@ const I18N = {
     shopOrderOk: "Order saved. We will call you. Online payment will be wired when you choose a provider.",
     shopNone: "No products in this category.",
     shopBack: "← IoT projects",
+    shopMetaTitle: "IoT shop – ESP components",
     flashBadge: "USB flash",
     notFound: "Project #{id} does not exist. Try 001, 002, 003…",
     notFoundId: "Project #{id} does not exist.",
@@ -236,6 +238,7 @@ const I18N = {
     shopOrderOk: "Заказ сохранён. Мы позвоним. Онлайн-оплату подключим, когда выберете способ.",
     shopNone: "В этой категории нет товаров.",
     shopBack: "← IoT-проекты",
+    shopMetaTitle: "IoT магазин – компоненты ESP",
     flashBadge: "USB flash",
     notFound: "Проекта #{id} нет. Попробуйте 001, 002, 003…",
     notFoundId: "Проекта #{id} нет.",
@@ -652,7 +655,7 @@ function localizedProject(p) {
 }
 
 function setLang(lang) {
-  if (!I18N[lang]) lang = "ro";
+  if (!lang || !I18N[lang]) return;
   currentLang = lang;
   try {
     localStorage.setItem(LANG_KEY, lang);
@@ -660,11 +663,15 @@ function setLang(lang) {
     /* ignore */
   }
   document.documentElement.lang = lang;
-  document.title = t("metaTitle");
+  const titleKey = document.body && document.body.getAttribute("data-title-key");
+  document.title = t(titleKey || "metaTitle");
   const desc = document.querySelector('meta[name="description"]');
-  if (desc) desc.setAttribute("content", t("metaDesc"));
+  if (desc) desc.setAttribute("content", t(titleKey ? "shopLead" : "metaDesc"));
   applyStaticI18n();
-  if (typeof route === "function") route();
+  const rerender =
+    (typeof window !== "undefined" && typeof window.route === "function" && window.route) ||
+    (typeof route === "function" ? route : null);
+  if (rerender) rerender();
 }
 
 function applyStaticI18n() {
@@ -686,7 +693,107 @@ function renderLangSwitch() {
 }
 
 function bindLangSwitch(root) {
-  (root || document).querySelectorAll(".lang-btn").forEach((btn) => {
+  (root || document).querySelectorAll(".lang-btn[data-lang]").forEach((btn) => {
     btn.addEventListener("click", () => setLang(btn.getAttribute("data-lang")));
   });
+}
+
+const SHOP_I18N = {
+  esp8266: {
+    en: { title: "NodeMCU ESP8266", short: "Wi‑Fi board for most ESP8266 projects." },
+    ru: { title: "NodeMCU ESP8266", short: "Wi‑Fi плата для большинства проектов ESP8266." },
+  },
+  esp32c3: {
+    en: { title: "ESP32-C3 Super Mini", short: "Tiny USB-C board for the ESP32 projects." },
+    ru: { title: "ESP32-C3 Super Mini", short: "Маленькая плата USB-C для проектов ESP32." },
+  },
+  "arduino-uno": {
+    en: { title: "Arduino Uno R3", short: "Classic board for tests and learning." },
+    ru: { title: "Arduino Uno R3", short: "Классическая плата для тестов и обучения." },
+  },
+  "relay-1": {
+    en: { title: "1-channel 5V relay", short: "ON/OFF one load. Projects #001, #003, #006, #010." },
+    ru: { title: "Реле 1 канал 5В", short: "Вкл/выкл одну нагрузку. #001, #003, #006, #010." },
+  },
+  "relay-2": {
+    en: { title: "2-channel 5V relay", short: "For ESP32 temperature + 2 relays (#002)." },
+    ru: { title: "Реле 2 канала 5В", short: "Для ESP32 температура + 2 реле (#002)." },
+  },
+  "relay-4": {
+    en: { title: "4-channel 5V relay", short: "Four outputs panel (#008)." },
+    ru: { title: "Реле 4 канала 5В", short: "Панель на 4 выхода (#008)." },
+  },
+  dht22: {
+    en: { title: "DHT22 sensor", short: "Temperature + humidity. #004, #011." },
+    ru: { title: "Датчик DHT22", short: "Температура + влажность. #004, #011." },
+  },
+  ds18b20: {
+    en: { title: "DS18B20 + 4.7k resistor", short: "One-wire temperature sensor. #002." },
+    ru: { title: "DS18B20 + резистор 4.7к", short: "Датчик температуры на одном проводе. #002." },
+  },
+  pir: {
+    en: { title: "PIR HC-SR501", short: "Motion detect. Alarm #005." },
+    ru: { title: "PIR HC-SR501", short: "Датчик движения. Сигнализация #005." },
+  },
+  hcsr04: {
+    en: { title: "HC-SR04 distance sensor", short: "Ultrasonic 2–200 cm. #013." },
+    ru: { title: "Датчик расстояния HC-SR04", short: "Ультразвук 2–200 см. #013." },
+  },
+  soil: {
+    en: { title: "Soil moisture sensor", short: "Analog on A0. Planter #006." },
+    ru: { title: "Датчик влажности почвы", short: "Аналог на A0. Поливалка #006." },
+  },
+  leak: {
+    en: { title: "Water leak sensor", short: "Wet/dry contact. #010." },
+    ru: { title: "Датчик протечки", short: "Контакт мокро/сухо. #010." },
+  },
+  reed: {
+    en: { title: "Reed door contact", short: "Magnet + reed. #012." },
+    ru: { title: "Геркон двери", short: "Магнит + геркон. #012." },
+  },
+  buzzer: {
+    en: { title: "Active 5V buzzer", short: "PIR and leak alarm. #005, #010." },
+    ru: { title: "Зуммер 5В", short: "Сигнализация PIR и протечка. #005, #010." },
+  },
+  ws2812: {
+    en: { title: "WS2812 strip 8 LEDs", short: "Addressable RGB. #007." },
+    ru: { title: "Лента WS2812 8 светодиодов", short: "Адресный RGB. #007." },
+  },
+  servo: {
+    en: { title: "SG90 servo", short: "0–180°. #009." },
+    ru: { title: "Сервопривод SG90", short: "0–180°. #009." },
+  },
+  oled: {
+    en: { title: "0.96\" SSD1306 I2C OLED", short: "128×64 screen. Weather #011." },
+    ru: { title: "OLED 0.96\" SSD1306 I2C", short: "Экран 128×64. Погода #011." },
+  },
+  breadboard: {
+    en: { title: "400-point breadboard", short: "Prototyping without soldering." },
+    ru: { title: "Макетная плата 400 точек", short: "Прототип без пайки." },
+  },
+  jumpers: {
+    en: { title: "Jumper wires (40 pcs)", short: "Mixed M-M / M-F." },
+    ru: { title: "Провода jumper (40 шт)", short: "Микс M-M / M-F." },
+  },
+  resistors: {
+    en: { title: "4.7k + 220 Ω resistors", short: "Pull-up for DHT/DS18B20 and LED." },
+    ru: { title: "Резисторы 4.7к + 220 Ω", short: "Подтяжка DHT/DS18B20 и светодиод." },
+  },
+  "usb-micro": {
+    en: { title: "USB–Micro USB cable", short: "For NodeMCU ESP8266." },
+    ru: { title: "Кабель USB–Micro USB", short: "Для NodeMCU ESP8266." },
+  },
+  "usb-c": {
+    en: { title: "USB-C cable", short: "For ESP32-C3 Super Mini." },
+    ru: { title: "Кабель USB–C", short: "Для ESP32-C3 Super Mini." },
+  },
+};
+
+function localizedShopProduct(p) {
+  if (!p) return p;
+  const lang = typeof getLang === "function" ? getLang() : "ro";
+  if (lang === "ro") return p;
+  const extra = (SHOP_I18N[p.id] || {})[lang];
+  if (!extra) return p;
+  return Object.assign({}, p, extra);
 }

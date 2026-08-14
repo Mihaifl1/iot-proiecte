@@ -936,6 +936,33 @@ html.theme-fun .tab.active {
   margin: 0 0 16px;
 }
 .shop-cats { display: flex; flex-wrap: wrap; gap: 6px; }
+.shop-cat-btn {
+  border: 1px solid var(--border);
+  background: rgba(15, 20, 25, 0.45);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 4px 9px;
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+.shop-cat-btn:hover { color: var(--text); }
+.shop-cat-btn.is-on {
+  color: #a8cfe8;
+  background: var(--accent-soft);
+  border-color: rgba(91, 159, 212, 0.4);
+}
+html.theme-fun .shop-cat-btn {
+  background: #fffaf2;
+  color: #3d2a20;
+  border-color: #d9a56a;
+}
+html.theme-fun .shop-cat-btn.is-on {
+  color: #7c2d12;
+  background: #ffedd5;
+  border-color: #9a3412;
+}
 .shop-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
