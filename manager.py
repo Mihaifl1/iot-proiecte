@@ -1140,13 +1140,22 @@ class ManagerApp(ctk.CTk):
             self.ent_shop_phone.insert(0, str(saved.get("notifyPhone")))
         if saved.get("waApiKey"):
             self.ent_shop_key.insert(0, str(saved.get("waApiKey")))
+        act = ctk.CTkFrame(phone_row, fg_color="transparent")
+        act.pack(fill="x", pady=(6, 0))
+        ctk.CTkButton(
+            act,
+            text="1. Deschide WhatsApp (mesaj gata)",
+            width=240,
+            height=32,
+            fg_color="#16a34a",
+            hover_color="#15803d",
+            command=self._open_callmebot_activate,
+        ).pack(side="left")
         ctk.CTkLabel(
-            phone_row,
-            text="Activare o dată: pe WhatsApp trimite „I allow callmebot to send me messages” la +34 644 51 95 23. Botul îți dă ApiKey. Apoi Salvează aici.",
+            act,
+            text="  2. Apasă Trimite  ·  3. Copiază ApiKey aici  ·  4. Salvează",
             text_color="#71717a",
-            wraplength=720,
-            justify="left",
-        ).pack(anchor="w", pady=(6, 0))
+        ).pack(side="left", padx=8)
         self.shop_scroll = ctk.CTkScrollableFrame(wrap, fg_color="transparent")
         self.shop_scroll.pack(fill="both", expand=True)
         self._fill_shop_tab()
@@ -1226,6 +1235,12 @@ class ManagerApp(ctk.CTk):
             self._shop_rows.remove(rec)
         rec["frame"].destroy()
         self._mark_dirty()
+
+    def _open_callmebot_activate(self) -> None:
+        webbrowser.open(
+            "https://wa.me/34644519523?text="
+            + "I%20allow%20callmebot%20to%20send%20me%20messages"
+        )
 
     def _add_shop_product(self) -> None:
         self._add_shop_row(None)
